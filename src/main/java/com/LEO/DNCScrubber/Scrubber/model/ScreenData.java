@@ -140,6 +140,11 @@ public class ScreenData {
         return screenInfo.noSelectionMade;
     }
 
+    public String getInProgress() {
+        sync();
+        return screenInfo.inProgress;
+    }
+
     /**
      * Syncs the monitor and calling thread for data to load.
      */

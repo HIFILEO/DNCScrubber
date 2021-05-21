@@ -22,15 +22,15 @@ import java.awt.*;
 
 public class DncScrubberMainView {
     public JButton executeCommandButton;
-    JPanel mainPanel;
+    public JPanel mainPanel;
     public JTextArea outputTextArea;
     public JList commandList;
-    JPanel bottomPanel;
-    JPanel outputPanel;
+    public JPanel bottomPanel;
+    public JPanel outputPanel;
     public JPanel commandPanel;
-    JPanel inProgressPanel;
-    JLabel inProgressLabel;
-    JPanel inProgressCardPanel;
+    public JPanel inProgressPanel;
+    public JLabel inProgressLabel;
+    public JPanel inProgressCardPanel;
 
     public JFrame frame;
 

@@ -29,4 +29,5 @@ public class ScreenInfo {
     public String fileNameMessage;
     public String[] commands;
     public String noSelectionMade;
+    public String inProgress;
 }

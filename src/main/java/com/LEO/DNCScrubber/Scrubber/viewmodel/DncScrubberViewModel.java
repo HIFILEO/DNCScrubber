@@ -36,10 +36,8 @@ public class DncScrubberViewModel {
     private final ScrubberInteractor scrubberInteractor;
 
     private Observable<UiModel> uiModelObservable;
-    private Observable<UiEvent> startEventsObservable;
     private ObservableTransformer<UiEvent, Action> transformEventsIntoActions;
     private PublishRelay<UiEvent> publishRelayUiEvents = PublishRelay.create();
-
 
     /**
      * Constructor. Members are injected.
@@ -87,7 +85,6 @@ public class DncScrubberViewModel {
                 .publish(scrubberInteractor::processAction)
                 //Scan Results to Update UiModel
                 .scan(UiModel.init(screenData.getMainCommands()), (uiModel, result) -> {
-                    //Timber.i("Thread name: %s. Scan Results to UiModel", Thread.currentThread().getName());
                     //logger.debug("Scan results: Thread name {}", Thread.currentThread());
                     if (result instanceof ExitResult) {
                         return UiModel.exit();
@@ -138,21 +135,23 @@ public class DncScrubberViewModel {
 
         switch (loadRawLeadsResult.getType()) {
             case Result.ResultType.IN_FLIGHT:
-                uiModelBuilder.setScreenMessage("");
+                uiModelBuilder.setScreenMessage(CommandType.LOAD_RAW_LEADS + " " + screenData.getInProgress());
                 uiModelBuilder.setInFlight(true);
                 uiModelBuilder.setPreviousCommand(CommandType.LOAD_RAW_LEADS);
                 break;
             case Result.ResultType.FAILURE:
                 uiModelBuilder.setPreviousCommand(CommandType.NONE);
-                uiModelBuilder.setScreenMessage("\n" + CommandType.LOAD_RAW_LEADS + " " +
+                uiModelBuilder.setScreenMessage(CommandType.LOAD_RAW_LEADS + " " +
                         screenData.getError() + "\n" +
                         "Error Msg: " + loadRawLeadsResult.getErrorMessage() + "\n\n" +
                         screenData.getMainCommands());
+                uiModelBuilder.setInFlight(false);
                 break;
             case Result.ResultType.SUCCESS:
                 uiModelBuilder.setPreviousCommand(CommandType.NONE);
-                uiModelBuilder.setScreenMessage("\n" + CommandType.LOAD_RAW_LEADS + " " +
+                uiModelBuilder.setScreenMessage(CommandType.LOAD_RAW_LEADS + " " +
                         screenData.getSuccess() + "\n\n" + screenData.getMainCommands());
+                uiModelBuilder.setInFlight(false);
                 break;
             default:
                 //Unknown result - throw error

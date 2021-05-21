@@ -34,21 +34,12 @@ public class DncScrubberViewController {
     private final DncScrubberMainView dncScrubberMainView = new DncScrubberMainView();
     private final ScreenData screenData;
     private final Scheduler uiScheduler;
-    private final Scheduler keyboardScheduler;
 
     private final PublishSubject<String> mainThreadSubject = PublishSubject.create();
-    private final PublishSubject<String> printToScreenSubject = PublishSubject.create();
-    private final PublishSubject<String> keyboardSubject = PublishSubject.create();
-
     private final DncScrubberViewModel dncScrubberViewModel;
-
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private Disposable keyboardCommandsDisposable;
-    private Disposable keyboardFileNameDisposable;
-    private Disposable processingDisposable;
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final ExecutorService uiExecutorService;
-    private final ExecutorService keyboardExecutorService;
 
     public DncScrubberViewController(DncScrubberViewModel dncScrubberViewModel, ScreenData screenData) {
         uiExecutorService = Executors.newSingleThreadExecutor(
@@ -58,15 +49,7 @@ public class DncScrubberViewController {
                     return thread;
                 });
 
-        keyboardExecutorService = Executors.newSingleThreadExecutor(
-                runnable -> {
-                    Thread thread = new Thread(runnable);
-                    thread.setName("Keyboard-IO-Thread");
-                    return thread;
-                });
-
         uiScheduler = Schedulers.from(uiExecutorService);
-        keyboardScheduler = Schedulers.from(keyboardExecutorService);
         this.screenData = screenData;
         this.dncScrubberViewModel = dncScrubberViewModel;
     }
@@ -101,133 +84,21 @@ public class DncScrubberViewController {
         compositeDisposable.dispose();
 
         uiScheduler.shutdown();
-        keyboardScheduler.shutdown();
 
         //Note - as per design, you need to shut down the executor when creating a custom scheduler.
         //https://github.com/ReactiveX/RxJava/issues/6027
         uiExecutorService.shutdown();
-
-        //Note - you need to interrupt the thread in the observer since it's predicated on a sleep for
-        //busy waiting on keyboard input.
-        keyboardExecutorService.shutdownNow();
 
         //Note - Good practice to wait.
         try {
             if (!uiExecutorService.awaitTermination(1500, TimeUnit.MILLISECONDS)) {
                 logger.warn("uiExecutorService didn't terminate gracefully. Timeout occurred");
             }
-            if (keyboardExecutorService.awaitTermination(1500, TimeUnit.MILLISECONDS)) {
-                logger.warn("keyboardExecutorService didn't terminate gracefully. Timeout occurred");
-            }
         } catch (InterruptedException e) {
             logger.warn("Main thread interrupted while waiting for threads to close:[]", e);
         }
-    }
 
-    private void bindKeyboardCommands() {
-        //
-        //Guard
-        //
-        if (keyboardCommandsDisposable != null) {
-            return;
-        }
-
-        //
-        //Connect keyboard
-        //
-        keyboardCommandsDisposable = keyboardSubject
-            //observe down-
-            .observeOn(uiScheduler)
-            .debounce(500, TimeUnit.MILLISECONDS)
-            .subscribe(string -> {
-                if (string.equalsIgnoreCase("0")) {
-                    dncScrubberViewModel.processUiEvent(new ExitEvent());
-                } else if (string.equalsIgnoreCase("1")) {
-                    dncScrubberViewModel.processUiEvent(new LoadRawLeadsEvent(""));
-                } else {
-                    printToScreenSubject.onNext("Please enter a valid entry... \n");
-                }
-
-            }, throwable -> {
-                logger.error("Keyboard listener threw an error: " + throwable);
-                throw new Exception("Keyboard failed", throwable);
-            });
-    }
-
-    private void unbindKeyboardCommands() {
-        if (keyboardCommandsDisposable != null) {
-            keyboardCommandsDisposable.dispose();
-            compositeDisposable.delete(keyboardCommandsDisposable);
-        }
-        keyboardCommandsDisposable = null;
-    }
-
-    private void bindKeyboardFileName(final CommandType previousCommandType) {
-        //
-        //Guard
-        //
-        if (keyboardFileNameDisposable != null) {
-            return;
-        }
-
-        //
-        //Connect keyboard
-        //
-        keyboardFileNameDisposable = keyboardSubject
-                //observe down-
-                .observeOn(uiScheduler)
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .subscribe(fileName -> {
-                    switch (previousCommandType) {
-                        case LOAD_RAW_LEADS:
-                            dncScrubberViewModel.processUiEvent(new LoadRawLeadsEvent(fileName));
-                        default:
-                            throw new Exception("No previous command to track event.");
-                    }
-                }, throwable -> {
-                    logger.error("Keyboard listener threw an error: " + throwable);
-                    throw new Exception("Keyboard failed", throwable);
-                });
-    }
-
-    private void unbindKeyboardFileName() {
-        if (keyboardFileNameDisposable != null) {
-            keyboardFileNameDisposable.dispose();
-            compositeDisposable.delete(keyboardFileNameDisposable);
-        }
-        keyboardFileNameDisposable = null;
-    }
-
-    private void bindScreenProcessing() {
-        processingDisposable = Observable.interval(500L, TimeUnit.MILLISECONDS)
-                .flatMap(new Function<Long, ObservableSource<String>>() {
-                    int interval = 0;
-
-                    @Override
-                    public ObservableSource<String> apply(Long aLong) {
-                        String stringToReturn;
-                        if (interval >= 20) {
-                            stringToReturn = "\n";
-                            interval = 0;
-                        } else {
-                            stringToReturn = "***";
-                            interval++;
-                        }
-
-                        return Observable.just(stringToReturn);
-                    }
-                })
-                //observe down-
-                .observeOn(uiScheduler)
-                .subscribe(printToScreenSubject::onNext);
-        compositeDisposable.add(processingDisposable);
-    }
-
-    private void unbindScreenProcessing() {
-        if (processingDisposable != null) {
-            processingDisposable.dispose();
-            compositeDisposable.delete(processingDisposable);
-        }
+        logger.info("cleanUpAndShutdown() completed " + Thread.currentThread().getName());
     }
 
     /**
@@ -235,95 +106,8 @@ public class DncScrubberViewController {
      */
     private void bind() {
         //
-        //Bind to print screen subject
-        //
-        compositeDisposable.add(printToScreenSubject
-                .observeOn(uiScheduler)
-                .subscribe(new Consumer<String>() {
-                    @Override
-                    public void accept(String s) throws Exception {
-                        if (s.equalsIgnoreCase("***")) {
-                            System.out.print(s);
-                        } else {
-                            System.out.println(s);
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-
-                    }
-                }, new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        logger.debug("Complete print subject subscription");
-                    }
-                }));
-
-        //
         //Bind to UiModel
         //
-        compositeDisposable.add(dncScrubberViewModel.getUiModels()
-                .subscribeOn(uiScheduler)
-                .subscribe(
-                        this::processUiModel,
-                        throwable -> {
-                            throw new UnsupportedOperationException("Errors from Model Unsupported: "
-                                    + throwable.getLocalizedMessage());
-                        })
-        );
-
-        //
-        //Bind To Keyboard
-        //Note - You ran into issues with opening and closing the system.in scanner. It's recommended you open one
-        //for the duration of the program. You also ran into the problem that reading a stream was a BLOCKING call.
-        //To avoid this 'hanging' waiting for system input that you can't interrupt, you needed to wrap everything
-        //in a BufferedReader that is busy waiting for keyboard input.
-        //
-        //I don't like busy-waiting, but it is what it is.
-        //
-        compositeDisposable.add(Observable.<String>create(subscriber -> {
-            BufferedReader keyboardBufferedReader = new BufferedReader(new InputStreamReader(System.in));
-            boolean terminate = false;
-            do {
-                try {
-                    // wait until we have data to complete a readLine()
-                    while (!keyboardBufferedReader.ready()) {
-                        //Note - Code Smell, solution?
-                        Thread.sleep(200);
-                    }
-                    String input = keyboardBufferedReader.readLine();
-                    subscriber.onNext(input);
-                } catch (InterruptedException e) {
-                    keyboardBufferedReader.close();
-                    terminate = true;
-                    if (!subscriber.isDisposed()) {
-                        logger.error("Keyboard input threw an expected error [].  Subject not disposed gracefully", e);
-                        subscriber.onError(e);
-                    }
-                }
-            } while (!terminate || !subscriber.isDisposed());
-
-            keyboardBufferedReader.close();
-        })
-                //subscribe - up
-                .subscribeOn(keyboardScheduler)
-                /*
-                    Note - https://github.com/ReactiveX/RxJava/issues/4438
-                    You need to wrap this in a disposable so the logic during a shutdown
-                    does not throw exceptions o the Future<> contract.
-                 */
-                .subscribe(keyboardSubject::onNext));
-
-    }
-
-    private void createUi() {
-        //Call the JFrame setup in the auto generated code.
-        dncScrubberMainView.createUi();
-
-        //Since these values are static, setting them here and no in the UIModel
-        dncScrubberMainView.commandList.setListData(screenData.getCommands());
-
         //When window closes, kill program.
         dncScrubberMainView.frame.addWindowListener(new WindowListener() {
             @Override
@@ -386,14 +170,29 @@ public class DncScrubberViewController {
                         } else {
                             //Load Raw Leads
                             if (selectedItems.get(0).equalsIgnoreCase(screenData.getCommands()[0])) {
-                                
+                                dncScrubberViewModel.processUiEvent(new LoadRawLeadsEvent("new_haven_test.csv"));
                             }
                         }
                     }
                 }));
 
+        compositeDisposable.add(dncScrubberViewModel.getUiModels()
+                .subscribeOn(uiScheduler)
+                .subscribe(
+                        this::processUiModel,
+                        throwable -> {
+                            throw new UnsupportedOperationException("Errors from Model Unsupported: "
+                                    + throwable.getLocalizedMessage());
+                        })
+        );
+    }
 
+    private void createUi() {
+        //Call the JFrame setup in the auto generated code.
+        dncScrubberMainView.createUi();
 
+        //Since these values are static, setting them here and no in the UIModel
+        dncScrubberMainView.commandList.setListData(screenData.getCommands());
     }
 
     /**
@@ -408,26 +207,25 @@ public class DncScrubberViewController {
         //
         //Update Screen
         //
+        //exit
+        if (uiModel.isExit()) {
+            mainThreadSubject.onNext("exit");
+        }
+
+        //Screen Text
         if (uiModel.getScreenMessage() != null && !uiModel.getScreenMessage().isEmpty()) {
             dncScrubberMainView.outputTextArea.setText(uiModel.getScreenMessage());
+        }
 
-            unbindScreenProcessing();
-            printToScreenSubject.onNext(uiModel.getScreenMessage());
-
-            if (uiModel.getPreviousCommand() == CommandType.NONE) {
-                bindKeyboardCommands();
-                unbindKeyboardFileName();
-            } else {
-                unbindKeyboardCommands();
-                bindKeyboardFileName(uiModel.getPreviousCommand());
-            }
-        } else if (uiModel.isInFlight()) {
-            unbindKeyboardFileName();
-            unbindKeyboardCommands();
-            bindScreenProcessing();
+        //Progress Bar
+        if (uiModel.isInFlight()) {
+            dncScrubberMainView.inProgressCardPanel.setVisible(false);
+            dncScrubberMainView.inProgressLabel.setVisible(true);
+            dncScrubberMainView.executeCommandButton.setEnabled(false);
         } else {
-            //exit program
-            mainThreadSubject.onNext("exit");
+            dncScrubberMainView.inProgressCardPanel.setVisible(true);
+            dncScrubberMainView.inProgressLabel.setVisible(false);
+            dncScrubberMainView.executeCommandButton.setEnabled(true);
         }
     }
 

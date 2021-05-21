@@ -74,11 +74,14 @@ public class ScrubberInteractor {
                return Completable.create(new CompletableOnSubscribe() {
                    @Override
                    public void subscribe(CompletableEmitter emitter) throws Exception {
-                       csvFileReader.readRawLeadData("new_haven_test.csv")
-                               .count()
-                               .subscribe(numberOfItemsEmitted -> emitter.onComplete(),
-                                       emitter::onError
-                               );
+//                       csvFileReader.readRawLeadData("new_haven_test.csv")
+//                               .count()
+//                               .subscribe(numberOfItemsEmitted -> emitter.onComplete(),
+//                                       emitter::onError
+//                               );
+
+                       Thread.sleep(5000);
+                       emitter.onComplete();
                    }
                }).andThen(new ObservableSource<LoadRawLeadsResult>() {
                    @Override
@@ -94,7 +97,6 @@ public class ScrubberInteractor {
                    }
                })
                        .startWith(LoadRawLeadsResult.inFlight(true));
-
            });
        };
 
