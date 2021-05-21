@@ -1,0 +1,104 @@
+plugins {
+    id 'java'
+
+    //	Apply the application plugin to add support for building a CLI application in Java
+    id 'application'
+}
+
+group 'com.LEO'
+version '1.0-SNAPSHOT'
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
+    maven { url "https://jetbrains.bintray.com/intellij-third-party-dependencies" }
+}
+
+configurations {
+    antTask
+}
+
+dependencies {
+    //Open CSV
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.4'
+
+    //Dagger
+    annotationProcessor "com.google.dagger:dagger-compiler:2.11"
+    compileOnly 'javax.annotation:jsr250-api:1.0'
+    implementation 'com.google.dagger:dagger:2.11'
+
+    //Rx
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.9'
+
+    //RxRelay
+    implementation 'com.jakewharton.rxrelay2:rxrelay:2.0.0'
+
+    //Gson
+    implementation 'com.google.code.gson:gson:2.8.2'
+
+    //add Logback
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'ch.qos.logback:logback-core:1.2.3'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+
+    //Unit Test
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.apache.maven:maven-ant-tasks:2.1.3'
+    testImplementation 'org.mockito:mockito-core:2.6.2'
+    testImplementation 'org.assertj:assertj-core:2.6.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
+
+    antTask 'com.jetbrains.intellij.java:java-compiler-ant-tasks:203.7148.30'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'com.LEO.DNCScrubber.core.application.DncScrubberApplication'
+}
+
+// Workaround as per https://youtrack.jetbrains.com/issue/IDEA-197469
+// Required for copying resources to the executable path.
+//def moduleVersion = project.version
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/java", "src/main/resources"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
+        }
+    }
+
+    // at compile time, put resources in same directories as classes
+    main.output.resourcesDir = main.java.outputDir
+}
+
+
+
+task compileJava(type: JavaCompile, overwrite: true, dependsOn: configurations.compile.getTaskDependencyFromProjectDependency(true, 'jar')) {
+    doLast {
+        project.sourceSets.main.output.classesDirs.each { project.mkdir(it) }
+        ant.taskdef name: 'javac2', classname: 'com.intellij.ant.Javac2', classpath: configurations.antTask.asPath
+        ant.javac2 srcdir: project.sourceSets.main.java.srcDirs.join(':'),
+                classpath: project.sourceSets.main.compileClasspath.asPath,
+                destdir: project.sourceSets.main.output.classesDirs[0],
+                source: sourceCompatibility,
+                target: targetCompatibility,
+                includeAntRuntime: false
+    }
+}
