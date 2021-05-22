@@ -18,7 +18,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 
 import javax.swing.*;
-import java.awt.*;
 
 public class DncScrubberMainView {
     public JButton executeCommandButton;

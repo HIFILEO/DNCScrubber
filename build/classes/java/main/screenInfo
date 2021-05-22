@@ -1,13 +1,11 @@
 {
-  "mainCommands": "Please Choose One Of The Following Actions:
-                   0 - Exit Program
-                   1 - Load Raw Lead Data",
+  "mainCommands": "Please Choose A Command Below:",
   "error": "error",
   "success" : "Success!!!!",
   "fileNameMessage" : "Enter the name of the file to load:",
+  "inProgress" : "in progress",
   "commands": [
-        "Load Raw Lead Data",
-        "Just taking up space"
+        "Load Raw Lead Data"
         ],
   "noSelectionMade" : "No selection made. Please highlight a selection and hit execute button"
 }

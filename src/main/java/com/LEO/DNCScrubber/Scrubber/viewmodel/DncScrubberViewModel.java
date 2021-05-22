@@ -17,7 +17,6 @@ import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
 import com.LEO.DNCScrubber.Scrubber.model.result.NoSelectionResult;
 import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import com.LEO.DNCScrubber.Scrubber.model.uiModel.UiModel;
-import com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController;
 import com.jakewharton.rxrelay2.PublishRelay;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -34,10 +33,10 @@ public class DncScrubberViewModel {
     final static Logger logger = LoggerFactory.getLogger(DncScrubberViewModel.class);
     private final ScreenData screenData;
     private final ScrubberInteractor scrubberInteractor;
+    private final PublishRelay<UiEvent> publishRelayUiEvents = PublishRelay.create();
 
     private Observable<UiModel> uiModelObservable;
     private ObservableTransformer<UiEvent, Action> transformEventsIntoActions;
-    private PublishRelay<UiEvent> publishRelayUiEvents = PublishRelay.create();
 
     /**
      * Constructor. Members are injected.
@@ -97,7 +96,7 @@ public class DncScrubberViewModel {
                     //Unknown result - throw error
                     throw new IllegalArgumentException("Unknown Result: " + result);
                 });
-                //Save history for late subscribers.
+                //Save history for late subscribers - for restoring state
                 //.replay(1)
                 //.autoConnect();
     }
@@ -163,7 +162,6 @@ public class DncScrubberViewModel {
 
     public UiModel processNoSelectionResult(UiModel uiModel, NoSelectionResult noSelectionResult) {
         UiModel.UiModelBuilder uiModelBuilder = new UiModel.UiModelBuilder(uiModel);
-
         uiModelBuilder.setScreenMessage(screenData.getNoSelectionMade());
 
         return uiModelBuilder.createUiModel();

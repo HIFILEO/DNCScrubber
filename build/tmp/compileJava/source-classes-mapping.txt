@@ -23,10 +23,10 @@ com/LEO/DNCScrubber/Scrubber/controller/CsvFileReaderImpl.java
  com.LEO.DNCScrubber.Scrubber.controller.CsvFileReaderImpl
 com/LEO/DNCScrubber/Scrubber/controller/CsvFileReader.java
  com.LEO.DNCScrubber.Scrubber.controller.CsvFileReader
-com/LEO/DNCScrubber/Scrubber/model/CommandType.java
- com.LEO.DNCScrubber.Scrubber.model.CommandType
 com/LEO/DNCScrubber/Scrubber/model/event/UiEvent.java
  com.LEO.DNCScrubber.Scrubber.model.event.UiEvent
+com/LEO/DNCScrubber/Scrubber/model/CommandType.java
+ com.LEO.DNCScrubber.Scrubber.model.CommandType
 com/LEO/DNCScrubber/Scrubber/model/event/LoadRawLeadsEvent.java
  com.LEO.DNCScrubber.Scrubber.model.event.LoadRawLeadsEvent
 com/LEO/DNCScrubber/core/application/DncScrubberApplication.java
@@ -46,12 +46,7 @@ com/LEO/DNCScrubber/Scrubber/viewconntroller/DncScrubberViewController.java
  com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$1
  com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$2
  com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$3
- com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$4
- com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$5
- com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$6
- com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$7
- com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$7$1
- com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$8
+ com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController$3$1
 com/LEO/DNCScrubber/core/dagger/ApplicationModule.java
  com.LEO.DNCScrubber.core.dagger.ApplicationModule
 com/LEO/DNCScrubber/Scrubber/model/event/NoSelectionEvent.java
