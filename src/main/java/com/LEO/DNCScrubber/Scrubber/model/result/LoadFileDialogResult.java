@@ -17,39 +17,24 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.io.File;
+import com.LEO.DNCScrubber.Scrubber.model.CommandType;
 
-public class LoadRawLeadsResult extends Result {
-    private final @ResultType int resultType;
-    private final boolean needsFileName;
-    private final String errorMessage;
+public class LoadFileDialogResult extends Result{
+    private final CommandType commandType;
     private final boolean userCanceled;
     private final boolean fileLoadError;
+    private final String errorMessage;
 
-    public LoadRawLeadsResult(int resultType, boolean needsFileName, String errorMessage, boolean userCanceled,
-                              boolean fileLoadError) {
-        this.resultType = resultType;
-        this.needsFileName = needsFileName;
-        this.errorMessage = errorMessage;
+    public LoadFileDialogResult(CommandType commandType, boolean userCanceled, boolean fileLoadError,
+                                String errorMessage) {
+        this.commandType = commandType;
         this.userCanceled = userCanceled;
         this.fileLoadError = fileLoadError;
+        this.errorMessage = errorMessage;
     }
 
-    public static LoadRawLeadsResult inFlight(boolean needsFileName) {
-        return new LoadRawLeadsResult(ResultType.IN_FLIGHT, needsFileName, "", false, false);
-    }
-
-    @Override
-    public int getType() {
-        return resultType;
-    }
-
-    public boolean isNeedsFileName() {
-        return needsFileName;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
+    public CommandType getCommandType() {
+        return commandType;
     }
 
     public boolean isUserCanceled() {
@@ -58,5 +43,18 @@ public class LoadRawLeadsResult extends Result {
 
     public boolean isFileLoadError() {
         return fileLoadError;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    @Override
+    public int getType() {
+        if (!userCanceled && !fileLoadError) {
+            return ResultType.SUCCESS;
+        } else {
+            return ResultType.FAILURE;
+        }
     }
 }

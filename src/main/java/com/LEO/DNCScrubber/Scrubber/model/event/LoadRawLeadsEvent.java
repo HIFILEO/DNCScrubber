@@ -17,14 +17,16 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-public class LoadRawLeadsEvent extends UiEvent{
-    private final String fileName;
+import java.io.File;
 
-    public LoadRawLeadsEvent(String fileName) {
-        this.fileName = fileName;
+public class LoadRawLeadsEvent extends UiEvent{
+    private final File csvFile;
+
+    public LoadRawLeadsEvent(File csvFile) {
+        this.csvFile = csvFile;
     }
 
-    public String getFileName() {
-        return fileName;
+    public File getCsvFile() {
+        return csvFile;
     }
 }

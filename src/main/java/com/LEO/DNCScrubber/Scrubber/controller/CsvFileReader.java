@@ -19,11 +19,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 import io.reactivex.Observable;
 
+import java.io.File;
+
 public interface CsvFileReader {
     /**
      * Reads the given CSV file and returns each line
-     * @param fileName - name and path of CSV file that conforms to the {@link RawLeadData}
+     * @param file - a CSV file that conforms to the {@link RawLeadData}
      * @return {@link RawLeadData} until EOF is reached, then On Complete is called. Will throw OnError - TBD
      */
-    Observable<RawLeadData> readRawLeadData(String fileName);
+    Observable<RawLeadData> readRawLeadData(File file);
 }

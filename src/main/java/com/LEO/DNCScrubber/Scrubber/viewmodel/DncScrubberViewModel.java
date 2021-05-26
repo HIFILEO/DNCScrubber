@@ -4,18 +4,9 @@ import com.LEO.DNCScrubber.Scrubber.controller.CsvFileReader;
 import com.LEO.DNCScrubber.Scrubber.interactor.ScrubberInteractor;
 import com.LEO.DNCScrubber.Scrubber.model.CommandType;
 import com.LEO.DNCScrubber.Scrubber.model.ScreenData;
-import com.LEO.DNCScrubber.Scrubber.model.action.Action;
-import com.LEO.DNCScrubber.Scrubber.model.action.ExitAction;
-import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
-import com.LEO.DNCScrubber.Scrubber.model.action.NoSelectionAction;
-import com.LEO.DNCScrubber.Scrubber.model.event.ExitEvent;
-import com.LEO.DNCScrubber.Scrubber.model.event.LoadRawLeadsEvent;
-import com.LEO.DNCScrubber.Scrubber.model.event.NoSelectionEvent;
-import com.LEO.DNCScrubber.Scrubber.model.event.UiEvent;
-import com.LEO.DNCScrubber.Scrubber.model.result.ExitResult;
-import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
-import com.LEO.DNCScrubber.Scrubber.model.result.NoSelectionResult;
-import com.LEO.DNCScrubber.Scrubber.model.result.Result;
+import com.LEO.DNCScrubber.Scrubber.model.action.*;
+import com.LEO.DNCScrubber.Scrubber.model.event.*;
+import com.LEO.DNCScrubber.Scrubber.model.result.*;
 import com.LEO.DNCScrubber.Scrubber.model.uiModel.UiModel;
 import com.jakewharton.rxrelay2.PublishRelay;
 import io.reactivex.Observable;
@@ -91,6 +82,8 @@ public class DncScrubberViewModel {
                         return processLoadRawLeadsResult(uiModel, (LoadRawLeadsResult) result);
                     } else if (result instanceof NoSelectionResult) {
                         return processNoSelectionResult(uiModel, (NoSelectionResult) result);
+                    } else if (result instanceof LoadFileDialogResult) {
+                        return processLoadFileDialogResult(uiModel, (LoadFileDialogResult) result);
                     }
 
                     //Unknown result - throw error
@@ -115,17 +108,44 @@ public class DncScrubberViewModel {
 
         final ObservableTransformer<LoadRawLeadsEvent, LoadRawLeadsAction> transformLoadRawLeads =
                 upstream -> upstream.flatMap((Function<LoadRawLeadsEvent, ObservableSource<LoadRawLeadsAction>>)
-                        loadRawLeadsEvent -> Observable.just(new LoadRawLeadsAction(loadRawLeadsEvent.getFileName())));
+                        this::transformLoadRawLeads);
 
         final ObservableTransformer<NoSelectionEvent, NoSelectionAction> transformNoSelection =
                 upstream -> upstream.flatMap(noSelectionEvent -> Observable.just(new NoSelectionAction()));
+
+        final ObservableTransformer<LoadFileDialogEvent, LoadFileDialogAction> transformLoadFileDialog =
+                upstream -> upstream.flatMap((Function<LoadFileDialogEvent, ObservableSource<LoadFileDialogAction>>)
+                        this::transformLoadFileDialog);
 
         transformEventsIntoActions = upstream -> upstream.publish(uiEventObservable ->
                 Observable.merge(
                         uiEventObservable.ofType(LoadRawLeadsEvent.class).compose(transformLoadRawLeads),
                         uiEventObservable.ofType(ExitEvent.class).compose(transformExit),
-                        uiEventObservable.ofType(NoSelectionEvent.class).compose(transformNoSelection)
+                        uiEventObservable.ofType(NoSelectionEvent.class).compose(transformNoSelection),
+                        uiEventObservable.ofType(LoadFileDialogEvent.class).compose(transformLoadFileDialog)
                 )
+        );
+    }
+
+    private UiModel processNoSelectionResult(UiModel uiModel, NoSelectionResult noSelectionResult) {
+        UiModel.UiModelBuilder uiModelBuilder = new UiModel.UiModelBuilder(uiModel);
+        uiModelBuilder.setScreenMessage(screenData.getNoSelectionMade());
+
+        return uiModelBuilder.createUiModel();
+    }
+
+    private Observable<LoadRawLeadsAction> transformLoadRawLeads(LoadRawLeadsEvent loadRawLeadsEvent) {
+        return Observable.just(
+                new LoadRawLeadsAction(loadRawLeadsEvent.getCsvFile())
+        );
+    }
+
+    private Observable<LoadFileDialogAction> transformLoadFileDialog(LoadFileDialogEvent loadFileDialogEvent) {
+        return Observable.just(
+                new LoadFileDialogAction(loadFileDialogEvent.getCommandType(),
+                        loadFileDialogEvent.isUserCanceled(),
+                        loadFileDialogEvent.isFileLoadError(),
+                        loadFileDialogEvent.getErrorMessage())
         );
     }
 
@@ -136,10 +156,12 @@ public class DncScrubberViewModel {
             case Result.ResultType.IN_FLIGHT:
                 uiModelBuilder.setScreenMessage(CommandType.LOAD_RAW_LEADS + " " + screenData.getInProgress());
                 uiModelBuilder.setInFlight(true);
-                uiModelBuilder.setPreviousCommand(CommandType.LOAD_RAW_LEADS);
+                uiModelBuilder.setShowLoadFileDialog(false);
+                uiModelBuilder.setCommand(CommandType.LOAD_RAW_LEADS);
                 break;
             case Result.ResultType.FAILURE:
-                uiModelBuilder.setPreviousCommand(CommandType.NONE);
+                uiModelBuilder.setCommand(CommandType.NONE);
+                uiModelBuilder.setShowLoadFileDialog(false);
                 uiModelBuilder.setScreenMessage(CommandType.LOAD_RAW_LEADS + " " +
                         screenData.getError() + "\n" +
                         "Error Msg: " + loadRawLeadsResult.getErrorMessage() + "\n\n" +
@@ -147,7 +169,8 @@ public class DncScrubberViewModel {
                 uiModelBuilder.setInFlight(false);
                 break;
             case Result.ResultType.SUCCESS:
-                uiModelBuilder.setPreviousCommand(CommandType.NONE);
+                uiModelBuilder.setShowLoadFileDialog(false);
+                uiModelBuilder.setCommand(CommandType.NONE);
                 uiModelBuilder.setScreenMessage(CommandType.LOAD_RAW_LEADS + " " +
                         screenData.getSuccess() + "\n\n" + screenData.getMainCommands());
                 uiModelBuilder.setInFlight(false);
@@ -160,9 +183,40 @@ public class DncScrubberViewModel {
         return uiModelBuilder.createUiModel();
     }
 
-    public UiModel processNoSelectionResult(UiModel uiModel, NoSelectionResult noSelectionResult) {
+    private UiModel processLoadFileDialogResult(UiModel uiModel, LoadFileDialogResult loadFileDialogResult) {
         UiModel.UiModelBuilder uiModelBuilder = new UiModel.UiModelBuilder(uiModel);
-        uiModelBuilder.setScreenMessage(screenData.getNoSelectionMade());
+
+        switch (loadFileDialogResult.getType()) {
+            case Result.ResultType.FAILURE:
+                uiModelBuilder.setCommand(CommandType.NONE);
+                uiModelBuilder.setShowLoadFileDialog(false);
+
+                if (loadFileDialogResult.isUserCanceled()) {
+                    uiModelBuilder.setScreenMessage(CommandType.LOAD_FILE_DIALOG + " - " +
+                            screenData.getDialogCancel() + "\n\n" +
+                            screenData.getMainCommands());
+
+                } else if (loadFileDialogResult.isFileLoadError()) {
+                    uiModelBuilder.setScreenMessage(CommandType.LOAD_FILE_DIALOG + " - " +
+                            screenData.getError() + "\n" +
+                            "Error Msg: " + loadFileDialogResult.getErrorMessage()+ "\n\n" +
+                            screenData.getMainCommands());
+                }
+
+                uiModelBuilder.setInFlight(false);
+                break;
+            case Result.ResultType.SUCCESS:
+                uiModelBuilder.setShowLoadFileDialog(true);
+                uiModelBuilder.setCommand(loadFileDialogResult.getCommandType());
+                uiModelBuilder.setScreenMessage(CommandType.LOAD_FILE_DIALOG + " - " +
+                        screenData.getSuccess() + "\n\n" + screenData.getMainCommands());
+                uiModelBuilder.setInFlight(false);
+                break;
+            case Result.ResultType.IN_FLIGHT:
+            default:
+                //Unknown result - throw error
+                throw new IllegalArgumentException("Unknown ResultType: " + loadFileDialogResult.getType());
+        }
 
         return uiModelBuilder.createUiModel();
     }

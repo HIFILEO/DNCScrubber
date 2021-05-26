@@ -21,6 +21,7 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import io.reactivex.Observable;
 
+import java.io.File;
 import java.io.FileReader;
 
 /**
@@ -28,9 +29,9 @@ import java.io.FileReader;
  */
 public class CsvFileReaderImpl implements CsvFileReader {
     @Override
-    public Observable<RawLeadData> readRawLeadData(String fileName) {
+    public Observable<RawLeadData> readRawLeadData(File file) {
        return Observable.create(emitter -> {
-           CsvToBeanBuilder cvsToBeanBuilder = new CsvToBeanBuilder(new FileReader("new_haven_test.csv"));
+           CsvToBeanBuilder cvsToBeanBuilder = new CsvToBeanBuilder(new FileReader(file));
            CsvToBean csvToBean = cvsToBeanBuilder.withType(RawLeadData.class).build();
 
            for (RawLeadData rawLeadData : (Iterable<RawLeadData>) csvToBean) {

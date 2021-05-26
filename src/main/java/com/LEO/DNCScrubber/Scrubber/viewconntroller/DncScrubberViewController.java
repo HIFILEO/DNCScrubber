@@ -2,15 +2,13 @@ package com.LEO.DNCScrubber.Scrubber.viewconntroller;
 
 import com.LEO.DNCScrubber.Scrubber.model.CommandType;
 import com.LEO.DNCScrubber.Scrubber.model.ScreenData;
-import com.LEO.DNCScrubber.Scrubber.model.event.ExitEvent;
-import com.LEO.DNCScrubber.Scrubber.model.event.LoadRawLeadsEvent;
-import com.LEO.DNCScrubber.Scrubber.model.event.NoSelectionEvent;
+import com.LEO.DNCScrubber.Scrubber.model.event.*;
 import com.LEO.DNCScrubber.Scrubber.model.uiModel.UiModel;
 import com.LEO.DNCScrubber.Scrubber.view.DncScrubberMainView;
+import com.LEO.DNCScrubber.Scrubber.view.FileChooserView;
 import com.LEO.DNCScrubber.Scrubber.viewmodel.DncScrubberViewModel;
 import io.reactivex.*;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.*;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -21,8 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -169,8 +166,10 @@ public class DncScrubberViewController {
                             dncScrubberViewModel.processUiEvent(new NoSelectionEvent());
                         } else {
                             //Load Raw Leads
-                            if (selectedItems.get(0).equalsIgnoreCase(screenData.getCommands()[0])) {
-                                dncScrubberViewModel.processUiEvent(new LoadRawLeadsEvent("new_haven_test.csv"));
+                            String selectedItem = selectedItems.get(0);
+                            if (selectedItem.equalsIgnoreCase(screenData.getCommands()[0])) {
+                                dncScrubberViewModel.processUiEvent(new LoadFileDialogEvent(
+                                        CommandType.LOAD_RAW_LEADS, false, false, ""));
                             }
                         }
                     }
@@ -226,6 +225,41 @@ public class DncScrubberViewController {
             dncScrubberMainView.inProgressCardPanel.setVisible(true);
             dncScrubberMainView.inProgressLabel.setVisible(false);
             dncScrubberMainView.executeCommandButton.setEnabled(true);
+        }
+
+        //FileChooserView
+        if (uiModel.isShowLoadFileDialog()) {
+            Single.create(new SingleOnSubscribe<UiEvent>() {
+                @Override
+                public void subscribe(SingleEmitter<UiEvent> emitter) throws Exception {
+                    FileChooserView fileChooserView = new FileChooserView();
+                    fileChooserView.showChooser();
+
+                    File file = fileChooserView.getFile();
+                    if (file != null) {
+                        switch (uiModel.getCommand()) {
+                            case LOAD_RAW_LEADS:
+                                emitter.onSuccess(new LoadRawLeadsEvent(file));
+                                break;
+                            case EXIT:
+                            case LOAD_FILE_DIALOG:
+                            default:
+                                throw new Exception("Wrong command Type! Should never happen!");
+                        }
+                    } else {
+                        emitter.onSuccess(new LoadFileDialogEvent
+                                (CommandType.NONE,
+                                        fileChooserView.isUserCanceled(),
+                                        fileChooserView.isFileLoadError(),
+                                        fileChooserView.getErrorMessage()));
+                    }
+                }
+            }).subscribe(new Consumer<UiEvent>() {
+                @Override
+                public void accept(UiEvent uiEvent) throws Exception {
+                    dncScrubberViewModel.processUiEvent(uiEvent);
+                }
+            });
         }
     }
 

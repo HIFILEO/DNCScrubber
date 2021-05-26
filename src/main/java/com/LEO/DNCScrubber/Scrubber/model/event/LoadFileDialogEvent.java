@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.action;/*
+package com.LEO.DNCScrubber.Scrubber.model.event;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,16 +17,39 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.io.File;
+import com.LEO.DNCScrubber.Scrubber.model.CommandType;
 
-public class LoadRawLeadsAction extends Action {
-    private final File csvFile;
+/**
+ * Event to trigger the loading of a file using the file loader dialog. Also holds the errors when this dialog
+ * fails or is canceled.
+ */
+public class LoadFileDialogEvent extends UiEvent {
+    private final CommandType commandType;
+    private final boolean userCanceled;
+    private final boolean fileLoadError;
+    private final String errorMessage;
 
-    public LoadRawLeadsAction(File csvFile) {
-        this.csvFile = csvFile;
+    public LoadFileDialogEvent(CommandType commandType, boolean userCanceled, boolean fileLoadError,
+                               String errorMessage) {
+        this.commandType = commandType;
+        this.userCanceled = userCanceled;
+        this.fileLoadError = fileLoadError;
+        this.errorMessage = errorMessage;
     }
 
-    public File getCsvFile() {
-        return csvFile;
+    public CommandType getCommandType() {
+        return commandType;
+    }
+
+    public boolean isUserCanceled() {
+        return userCanceled;
+    }
+
+    public boolean isFileLoadError() {
+        return fileLoadError;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

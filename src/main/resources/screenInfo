@@ -7,5 +7,7 @@
   "commands": [
         "Load Raw Lead Data"
         ],
-  "noSelectionMade" : "No selection made. Please highlight a selection and hit execute button"
+  "noSelectionMade" : "No selection made. Please highlight a selection and hit execute button",
+  "dialogCancel" : "File Selector Dialog Canceled",
+  "dialogFailure" : "File Selector Dialog Failed To Load File"
 }
