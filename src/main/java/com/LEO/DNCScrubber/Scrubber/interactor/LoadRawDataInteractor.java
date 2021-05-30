@@ -17,25 +17,31 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.CsvFileReader;
+import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
+import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
+import com.LEO.DNCScrubber.Scrubber.gateway.RawLeadDBImpl;
 import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
+import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
 import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import io.reactivex.*;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoadRawDataInteractor {
     final static Logger logger = LoggerFactory.getLogger(LoadRawDataInteractor.class);
-    private final CsvFileReader csvFileReader;
+    private final CsvFileController csvFileController;
+    private final DatabaseGateway databaseGateway;
 
     /**
      * Constructor
-     * @param csvFileReader - CSV File Reader
+     * @param csvFileController - CSV File Reader
      */
-    public LoadRawDataInteractor(CsvFileReader csvFileReader) {
-        this.csvFileReader = csvFileReader;
+    public LoadRawDataInteractor(CsvFileController csvFileController, DatabaseGateway databaseGateway) {
+        this.csvFileController = csvFileController;
+        this.databaseGateway = databaseGateway;
     }
 
     /**
@@ -58,8 +64,21 @@ public class LoadRawDataInteractor {
 //                                       emitter::onError
 //                               );
 
-                Thread.sleep(5000);
-                emitter.onComplete();
+                //Test
+
+                RawLeadDBImpl rawLeadDB = new RawLeadDBImpl();
+                rawLeadDB.setOwnerOneFirstName("Dan");
+                rawLeadDB.setOwnerTwoLastName("Leonardis");
+                databaseGateway.writeRawLead(rawLeadDB).subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean aBoolean) throws Exception {
+                        Thread.sleep(5000);
+                        emitter.onComplete();
+                    }
+                });
+
+
+
             }
         }).andThen(new ObservableSource<LoadRawLeadsResult>() {
             @Override

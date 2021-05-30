@@ -1,6 +1,7 @@
 package com.LEO.DNCScrubber.Scrubber.viewmodel;
 
-import com.LEO.DNCScrubber.Scrubber.controller.CsvFileReader;
+import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
+import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.interactor.ScrubberInteractor;
 import com.LEO.DNCScrubber.Scrubber.model.CommandType;
 import com.LEO.DNCScrubber.Scrubber.model.ScreenData;
@@ -33,9 +34,10 @@ public class DncScrubberViewModel {
      * Constructor. Members are injected.
      */
     @Inject
-    public DncScrubberViewModel(ScreenData screenData, CsvFileReader csvFileReader) {
+    public DncScrubberViewModel(ScreenData screenData, CsvFileController csvFileController,
+                                DatabaseGateway databaseGateway) {
         this.screenData = screenData;
-        this.scrubberInteractor = new ScrubberInteractor(csvFileReader);
+        this.scrubberInteractor = new ScrubberInteractor(csvFileController, databaseGateway);
         setupTransformers();
         bind();
     }
@@ -197,7 +199,7 @@ public class DncScrubberViewModel {
                             screenData.getMainCommands());
 
                 } else if (loadFileDialogResult.isFileLoadError()) {
-                    uiModelBuilder.setScreenMessage(CommandType.LOAD_FILE_DIALOG + " - " +
+                    uiModelBuilder.setScreenMessage(CommandType.LOAD_FILE_DIALOG + " -  " +
                             screenData.getError() + "\n" +
                             "Error Msg: " + loadFileDialogResult.getErrorMessage()+ "\n\n" +
                             screenData.getMainCommands());

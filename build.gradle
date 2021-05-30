@@ -42,6 +42,15 @@ dependencies {
     compile 'ch.qos.logback:logback-core:1.2.3'
     compile 'org.slf4j:slf4j-api:1.7.25'
 
+    //Hibernate
+    implementation group: 'org.hibernate', name: 'hibernate-gradle-plugin', version: '5.4.32.Final'
+
+    //h2
+    implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+
+    //JDBC Driver
+    implementation("com.oracle.database.jdbc:ojdbc8-production:21.1.0.0")
+
     //Unit Test
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.apache.maven:maven-ant-tasks:2.1.3'

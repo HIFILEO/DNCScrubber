@@ -17,12 +17,13 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 
 import java.util.Date;
 
-public class RawLeadData {
+public class RawLeadCVSImp implements RawLead {
 
     @CsvBindByName(column = "Address", required = true)
     private String address;
@@ -150,4 +151,208 @@ public class RawLeadData {
     @CsvDate("-MM/dd/yyyy")
     private Date dateAddedToList;
 
+    @Override
+    public String getAddress() {
+        return this.address;
+    }
+
+    @Override
+    public String getUnitNumber() {
+        return this.unitNumber;
+    }
+
+    @Override
+    public String getCity() {
+        return this.city;
+    }
+
+    @Override
+    public String getState() {
+        return this.state;
+    }
+
+    @Override
+    public String getZip() {
+        return this.zip;
+    }
+
+    @Override
+    public String getCounty() {
+        return this.county;
+    }
+
+    @Override
+    public String getABN() {
+        return this.aBN;
+    }
+
+    @Override
+    public boolean isOwnerOccupied() {
+        return this.ownerOccupied;
+    }
+
+    @Override
+    public String getOwnerOneFirstName() {
+        return this.ownerOneFirstName;
+    }
+
+    @Override
+    public String getOwnerOneLastName() {
+        return this.ownerOneLastName;
+    }
+
+    @Override
+    public String getCompanyName() {
+        return this.companyName;
+    }
+
+    @Override
+    public String getOwnerTwoFirstName() {
+        return this.ownerTwoFirstName;
+    }
+
+    @Override
+    public String getOwnerTwoLastName() {
+        return this.ownerTwoLastName;
+    }
+
+    @Override
+    public String getMailingCareOfName() {
+        return this.mailingCareOfName;
+    }
+
+    @Override
+    public String getMailingAddress() {
+        return this.mailingAddress;
+    }
+
+    @Override
+    public String getMailingUnitNumber() {
+        return this.mailingUnitNumber;
+    }
+
+    @Override
+    public String getMailingCity() {
+        return this.mailingCity;
+    }
+
+    @Override
+    public String getMailingState() {
+        return this.mailingState;
+    }
+
+    @Override
+    public String getMailingZip() {
+        return this.mailingZip;
+    }
+
+    @Override
+    public String getMailingCounty() {
+        return this.mailingCounty;
+    }
+
+    @Override
+    public String getDoNotMail() {
+        return this.doNotMail;
+    }
+
+    @Override
+    public String getPropertyType() {
+        return this.propertyType;
+    }
+
+    @Override
+    public float getBedrooms() {
+        return this.bedrooms;
+    }
+
+    @Override
+    public float getTotalBathrooms() {
+        return this.totalBathrooms;
+    }
+
+    @Override
+    public int getBuildingSqft() {
+        return this.buildingSqft;
+    }
+
+    @Override
+    public int getLotSizeSqft() {
+        return this.lotSizeSqft;
+    }
+
+    @Override
+    public int getEffectiveYearBuilt() {
+        return this.effectiveYearBuilt;
+    }
+
+    @Override
+    public int getTotalAssessedValue() {
+        return this.totalAssessedValue;
+    }
+
+    @Override
+    public Date getLastSaleRecordingDate() {
+        return this.lastSaleRecordingDate;
+    }
+
+    @Override
+    public int getLastSaleAmount() {
+        return this.lastSaleAmount;
+    }
+
+    @Override
+    public int getTotalOpenLoans() {
+        return this.totalOpenLoans;
+    }
+
+    @Override
+    public int getEstRemainingBalanceOfOpenLoans() {
+        return this.estRemainingBalanceOfOpenLoans;
+    }
+
+    @Override
+    public int getEstValue() {
+        return this.estValue;
+    }
+
+    @Override
+    public float getEstLoanToValue() {
+        return this.estLoanToValue;
+    }
+
+    @Override
+    public int getEstEquity() {
+        return this.estEquity;
+    }
+
+    @Override
+    public String getMLSStatus() {
+        return this.mLSStatus;
+    }
+
+    @Override
+    public Date getMLSDate() {
+        return this.mLSDate;
+    }
+
+    @Override
+    public int getMLSAmount() {
+        return this.mLSAmount;
+    }
+
+    @Override
+    public int getLienAmount() {
+        return this.lienAmount;
+    }
+
+    @Override
+    public int getMarketingLists() {
+        return this.marketingLists;
+    }
+
+    @Override
+    public Date getDateAddedToList() {
+        return this.dateAddedToList;
+    }
 }

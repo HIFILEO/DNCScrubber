@@ -17,28 +17,20 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
+import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import io.reactivex.Observable;
 
 import java.io.File;
-import java.io.FileReader;
 
 /**
- * Controller for interacting
+ * Controller for interacting with CSV File types.
  */
-public class CsvFileReaderImpl implements CsvFileReader {
-    @Override
-    public Observable<RawLeadData> readRawLeadData(File file) {
-       return Observable.create(emitter -> {
-           CsvToBeanBuilder cvsToBeanBuilder = new CsvToBeanBuilder(new FileReader(file));
-           CsvToBean csvToBean = cvsToBeanBuilder.withType(RawLeadData.class).build();
+public interface CsvFileController {
 
-           for (RawLeadData rawLeadData : (Iterable<RawLeadData>) csvToBean) {
-               emitter.onNext(rawLeadData);
-           }
-
-           emitter.onComplete();
-       });
-    }
+    /**
+     * Reads the given CSV file and returns each line as it's own {@link RawLead} object
+     * @param file - a CSV file that conforms to the {@link RawLead}
+     * @return {@link RawLead} until EOF is reached, then On Complete is called. Will throw OnError.
+     */
+    Observable<RawLead> readRawLeads(File file);
 }

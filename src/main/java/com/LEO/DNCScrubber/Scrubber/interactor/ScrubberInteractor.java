@@ -17,7 +17,8 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.CsvFileReader;
+import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
+import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.model.action.*;
 import com.LEO.DNCScrubber.Scrubber.model.result.*;
 import io.reactivex.*;
@@ -33,8 +34,8 @@ public class ScrubberInteractor {
     @NonNull
     private final ObservableTransformer<Action, Result> transformActionIntoResults;
 
-    public ScrubberInteractor(CsvFileReader csvFileReader) {
-        this.loadRawDataInteractor= new LoadRawDataInteractor(csvFileReader);
+    public ScrubberInteractor(CsvFileController csvFileController, DatabaseGateway databaseGateway) {
+        this.loadRawDataInteractor= new LoadRawDataInteractor(csvFileController, databaseGateway);
 
         /*
         Note the 'upstream->' represents new ObservableTransformer<T1,T1>

@@ -21,10 +21,10 @@ package com.LEO.DNCScrubber.core.application;
 import com.LEO.DNCScrubber.Scrubber.viewconntroller.DncScrubberViewController;
 import com.LEO.DNCScrubber.core.dagger.ApplicationComponent;
 import com.LEO.DNCScrubber.core.dagger.DaggerApplicationComponent;
+import com.LEO.DNCScrubber.core.hibernate.HibernateUtil;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +36,9 @@ public class DncScrubberApplication {
 
     @Inject
     DncScrubberViewController dncScrubberViewController;
+
+    @Inject
+    HibernateUtil hibernateUtil;
 
     public static void main(String args[]) {
         logger.info("Starting DNCScrubberApplication");
@@ -69,6 +72,10 @@ public class DncScrubberApplication {
                     public void run() throws Exception {
                         logger.debug("doOnComplete - inside app class thread " + Thread.currentThread().getName());
                     }
+                })
+                .doOnDispose(() -> {
+                    logger.info("DoOnDispose - Shutdown Hibernate");
+                    hibernateUtil.shutdown();
                 })
                 .blockingSubscribe(
                 new Observer<String>() {
