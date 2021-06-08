@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.gateway;/*
+package com.LEO.DNCScrubber.Scrubber.controller;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,90 +17,137 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 
-import javax.persistence.*;
 import java.util.Date;
 
-@Entity
-@Table(name = "RawLead")
-public class RawLeadDBImpl implements RawLead {
+public class RawLeadCsvCVSImp implements RawLeadCsv {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
-
+    @CsvBindByName(column = "Address", required = true)
     private String address;
+
+    @CsvBindByName(column = "Unit #", required = true)
     private String unitNumber;
+
+    @CsvBindByName(column = "City", required = true)
     private String city;
+
+    @CsvBindByName(column = "State", required = true)
     private String state;
+
+    @CsvBindByName(column = "Zip", required = true)
     private String zip;
+
+    @CsvBindByName(column = "County", required = true)
     private String county;
 
-    @Column(name = "ABN")
+    @CsvBindByName(column = "APN", required = true)
     private String aBN;
 
+    @CsvBindByName(column = "Owner Occupied", required = true)
     private boolean ownerOccupied;
 
-    @Column(name = "Owner_1_FirstName")
+    @CsvBindByName(column = "Owner 1 First Name", required = true)
     private String ownerOneFirstName;
 
-    @Column(name = "Owner_1_LastName")
+    @CsvBindByName(column = "Owner 1 Last Name", required = true)
     private String ownerOneLastName;
 
+    @CsvBindByName(column = "Company Name", required = true)
     private String companyName;
 
-    @Column(name = "Owner_2_FirstName")
+    @CsvBindByName(column = "Owner 2 First Name", required = true)
     private String ownerTwoFirstName;
 
-    @Column(name = "Owner_2_LastName")
+    @CsvBindByName(column = "Owner 2 Last Name", required = true)
     private String ownerTwoLastName;
 
+    @CsvBindByName(column = "Mailing Care of Name", required = true)
     private String mailingCareOfName;
+
+    @CsvBindByName(column = "Mailing Address", required = true)
     private String mailingAddress;
+
+    @CsvBindByName(column = "Mailing Unit #", required = true)
     private String mailingUnitNumber;
+
+    @CsvBindByName(column = "Mailing City", required = true)
     private String mailingCity;
+
+    @CsvBindByName(column = "Mailing State", required = true)
     private String mailingState;
+
+    @CsvBindByName(column = "Mailing Zip", required = true)
     private String mailingZip;
+
+    @CsvBindByName(column = "Mailing County", required = true)
     private String mailingCounty;
+
+    @CsvBindByName(column = "Do Not Mail", required = true)
     private String doNotMail;
+
+    @CsvBindByName(column = "Property Type", required = true)
     private String propertyType;
+
+    @CsvBindByName(column = "Bedrooms", required = true)
     private float bedrooms;
+
+    @CsvBindByName(column = "Total Bathrooms", required = true)
     private float totalBathrooms;
+
+    @CsvBindByName(column = "Building Sqft", required = true)
     private int buildingSqft;
+
+    @CsvBindByName(column = "Lot Size Sqft", required = true)
     private int lotSizeSqft;
+
+    @CsvBindByName(column = "Effective Year Built", required = true)
     private int effectiveYearBuilt;
+
+    @CsvBindByName(column = "Total Assessed Value", required = true)
     private int totalAssessedValue;
 
-    //Note = https://www.baeldung.com/hibernate-date-time = only holds yyyy-MM-dd, no time units
-    @Basic
-    @Temporal(TemporalType.DATE)
+    @CsvBindByName(column = "Last Sale Recording Date", required = true)
+    @CsvDate("yyyy-MM-dd")
     private Date lastSaleRecordingDate;
 
+    @CsvBindByName(column = "Last Sale Amount", required = true)
     private int lastSaleAmount;
+
+    @CsvBindByName(column = "Total Open Loans", required = true)
     private int totalOpenLoans;
+
+    @CsvBindByName(column = "Est. Remaining balance of Open Loans", required = true)
     private int estRemainingBalanceOfOpenLoans;
+
+    @CsvBindByName(column = "Est. Value", required = true)
     private int estValue;
+
+    @CsvBindByName(column = "Est. Loan-to-Value", required = true)
     private float estLoanToValue;
+
+    @CsvBindByName(column = "Est. Equity", required = true)
     private int estEquity;
+
+    @CsvBindByName(column = "MLS Status", required = true)
     private String mLSStatus;
 
-    @Basic
-    @Temporal(TemporalType.DATE)
-    @Column(name = "MLS_Date")
+    @CsvBindByName(column = "MLS Date", required = true)
+    @CsvDate("yyyy-MM-dd")
     private Date mLSDate;
 
-    @Column(name = "MLS_Amount")
+    @CsvBindByName(column = "MLS Amount", required = true)
     private int mLSAmount;
 
+    @CsvBindByName(column = "Lien Amount", required = true)
     private int lienAmount;
+
+    @CsvBindByName(column = "Marketing Lists", required = true)
     private int marketingLists;
 
-    @Basic
-    @Temporal(TemporalType.DATE)
+    @CsvBindByName(column = "Date Added to List", required = true)
+    @CsvDate("-MM/dd/yyyy")
     private Date dateAddedToList;
 
     @Override
@@ -306,185 +353,5 @@ public class RawLeadDBImpl implements RawLead {
     @Override
     public Date getDateAddedToList() {
         return this.dateAddedToList;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setUnitNumber(String unitNumber) {
-        this.unitNumber = unitNumber;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public void setZip(String zip) {
-        this.zip = zip;
-    }
-
-    public void setCounty(String county) {
-        this.county = county;
-    }
-
-    public String getaBN() {
-        return aBN;
-    }
-
-    public void setaBN(String aBN) {
-        this.aBN = aBN;
-    }
-
-    public void setOwnerOccupied(boolean ownerOccupied) {
-        this.ownerOccupied = ownerOccupied;
-    }
-
-    public void setOwnerOneFirstName(String ownerOneFirstName) {
-        this.ownerOneFirstName = ownerOneFirstName;
-    }
-
-    public void setOwnerOneLastName(String ownerOneLastName) {
-        this.ownerOneLastName = ownerOneLastName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public void setOwnerTwoFirstName(String ownerTwoFirstName) {
-        this.ownerTwoFirstName = ownerTwoFirstName;
-    }
-
-    public void setOwnerTwoLastName(String ownerTwoLastName) {
-        this.ownerTwoLastName = ownerTwoLastName;
-    }
-
-    public void setMailingCareOfName(String mailingCareOfName) {
-        this.mailingCareOfName = mailingCareOfName;
-    }
-
-    public void setMailingAddress(String mailingAddress) {
-        this.mailingAddress = mailingAddress;
-    }
-
-    public void setMailingUnitNumber(String mailingUnitNumber) {
-        this.mailingUnitNumber = mailingUnitNumber;
-    }
-
-    public void setMailingCity(String mailingCity) {
-        this.mailingCity = mailingCity;
-    }
-
-    public void setMailingState(String mailingState) {
-        this.mailingState = mailingState;
-    }
-
-    public void setMailingZip(String mailingZip) {
-        this.mailingZip = mailingZip;
-    }
-
-    public void setMailingCounty(String mailingCounty) {
-        this.mailingCounty = mailingCounty;
-    }
-
-    public void setDoNotMail(String doNotMail) {
-        this.doNotMail = doNotMail;
-    }
-
-    public void setPropertyType(String propertyType) {
-        this.propertyType = propertyType;
-    }
-
-    public void setBedrooms(float bedrooms) {
-        this.bedrooms = bedrooms;
-    }
-
-    public void setTotalBathrooms(float totalBathrooms) {
-        this.totalBathrooms = totalBathrooms;
-    }
-
-    public void setBuildingSqft(int buildingSqft) {
-        this.buildingSqft = buildingSqft;
-    }
-
-    public void setLotSizeSqft(int lotSizeSqft) {
-        this.lotSizeSqft = lotSizeSqft;
-    }
-
-    public void setEffectiveYearBuilt(int effectiveYearBuilt) {
-        this.effectiveYearBuilt = effectiveYearBuilt;
-    }
-
-    public void setTotalAssessedValue(int totalAssessedValue) {
-        this.totalAssessedValue = totalAssessedValue;
-    }
-
-    public void setLastSaleRecordingDate(Date lastSaleRecordingDate) {
-        this.lastSaleRecordingDate = lastSaleRecordingDate;
-    }
-
-    public void setLastSaleAmount(int lastSaleAmount) {
-        this.lastSaleAmount = lastSaleAmount;
-    }
-
-    public void setTotalOpenLoans(int totalOpenLoans) {
-        this.totalOpenLoans = totalOpenLoans;
-    }
-
-    public void setEstRemainingBalanceOfOpenLoans(int estRemainingBalanceOfOpenLoans) {
-        this.estRemainingBalanceOfOpenLoans = estRemainingBalanceOfOpenLoans;
-    }
-
-    public void setEstValue(int estValue) {
-        this.estValue = estValue;
-    }
-
-    public void setEstLoanToValue(float estLoanToValue) {
-        this.estLoanToValue = estLoanToValue;
-    }
-
-    public void setEstEquity(int estEquity) {
-        this.estEquity = estEquity;
-    }
-
-    public String getmLSStatus() {
-        return mLSStatus;
-    }
-
-    public void setmLSStatus(String mLSStatus) {
-        this.mLSStatus = mLSStatus;
-    }
-
-    public Date getmLSDate() {
-        return mLSDate;
-    }
-
-    public void setmLSDate(Date mLSDate) {
-        this.mLSDate = mLSDate;
-    }
-
-    public int getmLSAmount() {
-        return mLSAmount;
-    }
-
-    public void setmLSAmount(int mLSAmount) {
-        this.mLSAmount = mLSAmount;
-    }
-
-    public void setLienAmount(int lienAmount) {
-        this.lienAmount = lienAmount;
-    }
-
-    public void setMarketingLists(int marketingLists) {
-        this.marketingLists = marketingLists;
-    }
-
-    public void setDateAddedToList(Date dateAddedToList) {
-        this.dateAddedToList = dateAddedToList;
     }
 }

@@ -17,7 +17,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
+import com.LEO.DNCScrubber.Scrubber.model.data.ColdRvmLead;
 import io.reactivex.Observable;
 
 /**
@@ -26,9 +26,9 @@ import io.reactivex.Observable;
 public interface DatabaseGateway {
 
     /**
-     * Write a single {@link RawLead} to the database.
-     * @param rawLead - lead to write
+     * Write a single {@link ColdRvmLead} to the database.
+     * @param coldRvmLead - lead to write
      * @return - {@link Observable} boolean if successful, false otherwise
      */
-    Observable<Boolean> writeRawLead(RawLead rawLead);
+    Observable<Boolean> writeRawLead(ColdRvmLead coldRvmLead);
 }

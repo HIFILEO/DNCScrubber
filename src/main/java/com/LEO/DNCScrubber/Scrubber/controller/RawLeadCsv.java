@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.data;/*
+package com.LEO.DNCScrubber.Scrubber.controller;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -18,7 +18,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 import java.util.Date;
 
-public interface RawLead {
+public interface RawLeadCsv {
     String getAddress();
     String getUnitNumber();
     String getCity();

@@ -17,7 +17,6 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import io.reactivex.Observable;
@@ -31,12 +30,12 @@ import java.io.FileReader;
 public class CsvFileControllerImpl implements CsvFileController {
 
     @Override
-    public Observable<RawLead> readRawLeads(File file) {
+    public Observable<RawLeadCsv> readRawLeads(File file) {
        return Observable.create(emitter -> {
            CsvToBeanBuilder cvsToBeanBuilder = new CsvToBeanBuilder(new FileReader(file));
-           CsvToBean csvToBean = cvsToBeanBuilder.withType(RawLeadCVSImp.class).build();
+           CsvToBean csvToBean = cvsToBeanBuilder.withType(RawLeadCsvCVSImp.class).build();
 
-           for (RawLeadCVSImp rawLeadData : (Iterable<RawLeadCVSImp>) csvToBean) {
+           for (RawLeadCsvCVSImp rawLeadData : (Iterable<RawLeadCsvCVSImp>) csvToBean) {
                emitter.onNext(rawLeadData);
            }
 

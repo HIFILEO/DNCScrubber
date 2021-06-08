@@ -22,8 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 
 public class FileChooserView extends Component {
     final static Logger logger = LoggerFactory.getLogger(FileChooserView.class);
@@ -36,7 +38,18 @@ public class FileChooserView extends Component {
     private String errorMessage;
 
     public FileChooserView() {
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        //Try and open the running directory first always.
+        try {
+            fileChooser.setCurrentDirectory(new File((new File(".").getCanonicalPath())));
+        } catch (IOException e) {
+            logger.warn("File path for current directory failed. Set file chooser to User Home");
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        }
+
+        //only allow CSV files
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV FILES", "csv");
+        fileChooser.setFileFilter(filter);
+
         frame = new JFrame();
         frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);

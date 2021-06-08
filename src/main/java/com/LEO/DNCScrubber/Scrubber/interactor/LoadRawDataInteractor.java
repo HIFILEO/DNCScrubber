@@ -19,9 +19,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
-import com.LEO.DNCScrubber.Scrubber.gateway.RawLeadDBImpl;
 import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
-import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
+import com.LEO.DNCScrubber.Scrubber.model.data.*;
 import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
 import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import io.reactivex.*;
@@ -29,6 +28,8 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 public class LoadRawDataInteractor {
     final static Logger logger = LoggerFactory.getLogger(LoadRawDataInteractor.class);
@@ -65,11 +66,25 @@ public class LoadRawDataInteractor {
 //                               );
 
                 //Test
+                Address address = new Address();
+                address.setMailingAddress("52 Roosevelt Street");
+                Property property = new Property();
+                property.setAddress(address);
 
-                RawLeadDBImpl rawLeadDB = new RawLeadDBImpl();
-                rawLeadDB.setOwnerOneFirstName("Dan");
-                rawLeadDB.setOwnerTwoLastName("Leonardis");
-                databaseGateway.writeRawLead(rawLeadDB).subscribe(new Consumer<Boolean>() {
+                Phone phone = new Phone();
+                phone.setPhoneNumber("631-766-5134");
+                Person person = new Person();
+                person.setFirstName("Dan");
+                person.setLastName("Leonardis");
+                person.setPhone1(phone);
+                person.addProperty(property);
+
+                ColdRvmLead coldRvmLead = new ColdRvmLead();
+                coldRvmLead.setDateWorkflowStarted(new Date());
+                coldRvmLead.setPerson(person);
+                coldRvmLead.setProperty(property);
+
+                databaseGateway.writeRawLead(coldRvmLead).subscribe(new Consumer<Boolean>() {
                     @Override
                     public void accept(Boolean aBoolean) throws Exception {
                         Thread.sleep(5000);
