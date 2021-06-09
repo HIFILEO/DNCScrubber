@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.gateway;/*
+package com.LEO.DNCScrubber.Scrubber.gateway.model;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,7 +17,9 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.model.data.Address;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.NaturalId;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,41 +31,54 @@ public class PersonDb {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstName;
-    private String lastName;
+    //uniqueConstraints= combine {"firstName", "lastName", "address"}
+    @NaturalId(mutable=true)
+    @Column(nullable = false, unique = true)
+    private String naturalId = "";
 
-    private String address;
-    private String unitNumber;
-    private String city;
-    private String state;
-    private String zip;
-    private String county;
-    private String country;
+    @NotNull
+    @Column(nullable = false)
+    private String firstName = "";
 
-    private String phone1;
-    private String phone1Type;
+    @NotNull
+    @Column(nullable = false)
+    private String lastName = "";
+
+    @NotNull
+    @Column(nullable = false)
+    private String address = "";
+
+    private String unitNumber = "";
+    private String city = "";
+    private String state = "";
+    private String zip = "";
+    private String county = "";
+    private String country = "";
+
+    private String phone1 = "";
+    private String phone1Type = "";
     private boolean phone1DNC;
     private boolean phone1Stop;
     private boolean phone1Litigation;
-    private String phone1Telco;
+    private String phone1Telco = "";
 
-    private String phone2;
-    private String phone2Type;
+    private String phone2 = "";
+    private String phone2Type = "";
     private boolean phone2DNC;
     private boolean phone2Stop;
     private boolean phone2Litigation;
-    private String phone2Telco;
+    private String phone2Telco = "";
 
-    private String phone3;
-    private String phone3Type;
+    private String phone3 = "";
+    private String phone3Type = "";
     private boolean phone3DNC;
     private boolean phone3Stop;
     private boolean phone3Litigation;
-    private String phone3Telco;
+    private String phone3Telco = "";
 
-    private String email1;
-    private String email2;
-    private String email3;
+    private String email1 = "";
+    private String email2 = "";
+    private String email3 = "";
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "Property_id")
@@ -84,9 +99,13 @@ public class PersonDb {
         propertyDb.setPerson(this);
     }
 
-    public void removeComment(PropertyDb propertyDb) {
+    public void removeProperty(PropertyDb propertyDb) {
         properties.remove(propertyDb);
         propertyDb.setPerson(null);
+    }
+
+    public List<PropertyDb> getProperties() {
+        return properties;
     }
 
     public String getFirstName() {
@@ -327,5 +346,13 @@ public class PersonDb {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getNaturalId() {
+        return naturalId;
+    }
+
+    public void setNaturalId(String naturalId) {
+        this.naturalId = naturalId;
     }
 }

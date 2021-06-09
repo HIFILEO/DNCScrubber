@@ -230,4 +230,8 @@ public class Property {
     public void setDateAddedToList(Date dateAddedToList) {
         this.dateAddedToList = dateAddedToList;
     }
+
+    public String getNaturalId() {
+        return address.getMailingAddress() + "~" + address.getUnitNumber();
+    }
 }

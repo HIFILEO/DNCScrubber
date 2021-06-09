@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.gateway;/*
+package com.LEO.DNCScrubber.Scrubber.gateway.model;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -16,6 +16,8 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -23,28 +25,35 @@ import java.util.Date;
 @Entity
 @Table(name = "Property")
 public class PropertyDb {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String address;
-    private String unitNumber;
-    private String city;
-    private String state;
-    private String zip;
-    private String county;
-    private String country;
+    @NaturalId(mutable=true)
+    @Column(nullable = false, unique = true)
+    private String naturalId = "";
+
+    @NotNull
+    @Column(nullable = false)
+    private String address = "";
+    private String unitNumber = "";
+    private String city = "";
+    private String state = "";
+    private String zip = "";
+    private String county = "";
+    private String country = "";
 
     @Column(name = "APN")
-    private String aPN;
+    private String aPN = "";
 
     private boolean ownerOccupied;
-    private String companyName;
-    private String companyAddress;
+    private String companyName = "";
+    private String companyAddress = "";
 
-    private String propertyType;
-    private String bedrooms;
-    private String totalBathrooms;
+    private String propertyType = "";
+    private String bedrooms = "";
+    private String totalBathrooms = "";
     private int sqft;
     private int loftSizeSqft;
     private int yearBuilt;
@@ -53,7 +62,7 @@ public class PropertyDb {
     //Note = https://www.baeldung.com/hibernate-date-time = only holds yyyy-MM-dd, no time units
     @Basic
     @Temporal(TemporalType.DATE)
-    private Date lastSaleRecordingDate;
+    private Date lastSaleRecordingDate = new Date();
 
     private int lastSaleAmount;
     private int totalOpenLoans;
@@ -62,17 +71,17 @@ public class PropertyDb {
     private int estimatedEquity;
 
     @Column(name = "MLS_Status")
-    private String mLSStatus;
+    private String mLSStatus = "";
 
     @Basic
     @Temporal(TemporalType.DATE)
     @Column(name = "MLS_Date")
-    private Date mLSDate;
+    private Date mLSDate = new Date();
 
     @Column(name = "MLS_Amount")
-    private String mLSAmount;
+    private String mLSAmount = "";
 
-    private String lienAmount;
+    private String lienAmount = "";
 
     @Basic
     @Temporal(TemporalType.DATE)
@@ -347,5 +356,13 @@ public class PropertyDb {
 
     public void setDateAddedToList(Date dateAddedToList) {
         this.dateAddedToList = dateAddedToList;
+    }
+
+    public String getNaturalId() {
+        return naturalId;
+    }
+
+    public void setNaturalId(String naturalId) {
+        this.naturalId = naturalId;
     }
 }

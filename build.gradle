@@ -44,6 +44,7 @@ dependencies {
 
     //Hibernate
     implementation group: 'org.hibernate', name: 'hibernate-gradle-plugin', version: '5.4.32.Final'
+    implementation group: 'org.hibernate.validator', name: 'hibernate-validator-cdi', version: '7.0.0.Final'
 
     //h2
     implementation group: 'com.h2database', name: 'h2', version: '1.4.200'

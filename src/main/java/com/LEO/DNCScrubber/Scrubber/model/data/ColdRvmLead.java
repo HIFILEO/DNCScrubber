@@ -17,9 +17,6 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.gateway.PersonDb;
-import com.LEO.DNCScrubber.Scrubber.gateway.PropertyDb;
-
 import java.util.Date;
 
 /**
@@ -106,5 +103,20 @@ public class ColdRvmLead {
 
     public void setProperty(Property property) {
         this.property = property;
+    }
+
+    public String getNaturalId() {
+        String personNaturalId = "";
+        String propertyNaturalId = "";
+
+        if (property != null) {
+            personNaturalId = person.getNaturalId();
+        }
+
+        if (property != null) {
+            propertyNaturalId = property.getNaturalId();
+        }
+
+        return personNaturalId + "~" + propertyNaturalId;
     }
 }

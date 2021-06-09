@@ -91,9 +91,6 @@ public class LoadRawDataInteractor {
                         emitter.onComplete();
                     }
                 });
-
-
-
             }
         }).andThen(new ObservableSource<LoadRawLeadsResult>() {
             @Override
