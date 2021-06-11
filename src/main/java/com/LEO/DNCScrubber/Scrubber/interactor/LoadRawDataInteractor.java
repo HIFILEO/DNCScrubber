@@ -55,6 +55,7 @@ public class LoadRawDataInteractor {
         //1 - create a completable - you only care if you load file and save or throw errors. No values needed.
         //2  - andThen - change the completable back into Observable
         //3 - start with so things update on the UI.
+        //4 - I want a message that tells me how many were saved successfully.
         return Completable.create(new CompletableOnSubscribe() {
             @Override
             public void subscribe(CompletableEmitter emitter) throws Exception {
@@ -64,6 +65,17 @@ public class LoadRawDataInteractor {
 //                               .subscribe(numberOfItemsEmitted -> emitter.onComplete(),
 //                                       emitter::onError
 //                               );
+
+                /*
+                Business Rules
+                1 - If the cold lead exists, do nothing. We don't update from raw leads.
+                2 - If the property exists in the database, do nothing. We don't update from raw leads.
+                3 - If the person exists in the database, check if they own the property. If so, we don't update.
+                 */
+
+
+
+
 
                 //Test
                 Address address = new Address();
@@ -84,7 +96,7 @@ public class LoadRawDataInteractor {
                 coldRvmLead.setPerson(person);
                 coldRvmLead.setProperty(property);
 
-                databaseGateway.writeRawLead(coldRvmLead).subscribe(new Consumer<Boolean>() {
+                databaseGateway.writeColdRvmLead(coldRvmLead).subscribe(new Consumer<Boolean>() {
                     @Override
                     public void accept(Boolean aBoolean) throws Exception {
                         Thread.sleep(5000);
