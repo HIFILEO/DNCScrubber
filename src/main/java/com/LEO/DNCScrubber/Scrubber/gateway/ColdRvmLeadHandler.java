@@ -17,9 +17,9 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.gateway.model.ColdRvmLeadDb;
-import com.LEO.DNCScrubber.Scrubber.gateway.model.PersonDb;
-import com.LEO.DNCScrubber.Scrubber.gateway.model.PropertyDb;
+import com.LEO.DNCScrubber.Scrubber.gateway.model.ColdRvmLeadDao;
+import com.LEO.DNCScrubber.Scrubber.gateway.model.PersonDao;
+import com.LEO.DNCScrubber.Scrubber.gateway.model.PropertyDao;
 import com.LEO.DNCScrubber.Scrubber.model.data.ColdRvmLead;
 import com.LEO.DNCScrubber.Scrubber.model.data.Person;
 import com.LEO.DNCScrubber.Scrubber.model.data.Property;
@@ -86,171 +86,171 @@ public class ColdRvmLeadHandler {
     }
 
 
-    private void fillPropertyDbFromProperty(Property property, PropertyDb propertyDb) {
-        propertyDb.setNaturalId(property.getNaturalId());
-        propertyDb.setAddress(property.getAddress().getMailingAddress());
-        propertyDb.setUnitNumber(property.getAddress().getUnitNumber());
-        propertyDb.setCity(property.getAddress().getCity());
-        propertyDb.setState(property.getAddress().getState());
-        propertyDb.setZip(property.getAddress().getZip());
-        propertyDb.setCounty(property.getAddress().getCounty());
-        propertyDb.setCountry(property.getAddress().getCountry());
+    private void fillPropertyDbFromProperty(Property property, PropertyDao propertyDao) {
+        propertyDao.setNaturalId(property.getNaturalId());
+        propertyDao.setAddress(property.getAddress().getMailingAddress());
+        propertyDao.setUnitNumber(property.getAddress().getUnitNumber());
+        propertyDao.setCity(property.getAddress().getCity());
+        propertyDao.setState(property.getAddress().getState());
+        propertyDao.setZip(property.getAddress().getZip());
+        propertyDao.setCounty(property.getAddress().getCounty());
+        propertyDao.setCountry(property.getAddress().getCountry());
 
-        propertyDb.setaPN(property.getaPN());
-        propertyDb.setOwnerOccupied(property.isOwnerOccupied());
-        propertyDb.setCompanyName(property.getCompanyName());
-        propertyDb.setPropertyType(property.getPropertyType());
-        propertyDb.setBedrooms(property.getBedrooms());
-        propertyDb.setTotalBathrooms(property.getTotalBathrooms());
-        propertyDb.setSqft(property.getSqft());
-        propertyDb.setLoftSizeSqft(property.getLoftSizeSqft());
-        propertyDb.setYearBuilt(property.getYearBuilt());
-        propertyDb.setAssessedValue(property.getAssessedValue());
+        propertyDao.setaPN(property.getaPN());
+        propertyDao.setOwnerOccupied(property.isOwnerOccupied());
+        propertyDao.setCompanyName(property.getCompanyName());
+        propertyDao.setPropertyType(property.getPropertyType());
+        propertyDao.setBedrooms(property.getBedrooms());
+        propertyDao.setTotalBathrooms(property.getTotalBathrooms());
+        propertyDao.setSqft(property.getSqft());
+        propertyDao.setLoftSizeSqft(property.getLoftSizeSqft());
+        propertyDao.setYearBuilt(property.getYearBuilt());
+        propertyDao.setAssessedValue(property.getAssessedValue());
 
-        propertyDb.setLastSaleAmount(property.getLastSaleAmount());
-        propertyDb.setTotalOpenLoans(property.getTotalOpenLoans());
-        propertyDb.setEstimatedValue(property.getEstimatedValue());
-        propertyDb.setEstimatedEquity(property.getEstimatedEquity());
+        propertyDao.setLastSaleAmount(property.getLastSaleAmount());
+        propertyDao.setTotalOpenLoans(property.getTotalOpenLoans());
+        propertyDao.setEstimatedValue(property.getEstimatedValue());
+        propertyDao.setEstimatedEquity(property.getEstimatedEquity());
 
-        propertyDb.setmLSStatus(property.getmLSStatus());
+        propertyDao.setmLSStatus(property.getmLSStatus());
 
-        propertyDb.setmLSDate(property.getMlsDate());
+        propertyDao.setmLSDate(property.getMlsDate());
 
-        propertyDb.setmLSAmount(property.getmLSAmount());
+        propertyDao.setmLSAmount(property.getmLSAmount());
 
-        propertyDb.setLienAmount(property.getLienAmount());
+        propertyDao.setLienAmount(property.getLienAmount());
 
-        propertyDb.setDateAddedToList(property.getDateAddedToList());
+        propertyDao.setDateAddedToList(property.getDateAddedToList());
     }
 
-    private void fillPersonDbFromPerson(Person person, PersonDb personDb, Session session) {
-        personDb.setNaturalId(person.getNaturalId());
-        personDb.setFirstName(person.getFirstName());
-        personDb.setLastName(person.getLastName());
+    private void fillPersonDbFromPerson(Person person, PersonDao personDao, Session session) {
+        personDao.setNaturalId(person.getNaturalId());
+        personDao.setFirstName(person.getFirstName());
+        personDao.setLastName(person.getLastName());
 
-        personDb.setAddress(person.getAddress() != null ? person.getAddress().getMailingAddress() : "");
-        personDb.setUnitNumber(person.getAddress() != null ? person.getAddress().getUnitNumber() : "");
-        personDb.setCity(person.getAddress() != null ? person.getAddress().getCity() : "");
-        personDb.setState(person.getAddress() != null ? person.getAddress().getState() : "");
-        personDb.setZip(person.getAddress() != null ? person.getAddress().getZip() : "");
-        personDb.setCounty(person.getAddress() != null ? person.getAddress().getCounty() : "");
-        personDb.setCounty(person.getAddress() != null ? person.getAddress().getCountry() : "");
+        personDao.setAddress(person.getAddress() != null ? person.getAddress().getMailingAddress() : "");
+        personDao.setUnitNumber(person.getAddress() != null ? person.getAddress().getUnitNumber() : "");
+        personDao.setCity(person.getAddress() != null ? person.getAddress().getCity() : "");
+        personDao.setState(person.getAddress() != null ? person.getAddress().getState() : "");
+        personDao.setZip(person.getAddress() != null ? person.getAddress().getZip() : "");
+        personDao.setCounty(person.getAddress() != null ? person.getAddress().getCounty() : "");
+        personDao.setCounty(person.getAddress() != null ? person.getAddress().getCountry() : "");
 
-        personDb.setPhone1(person.getPhone1() != null ? person.getPhone1().getPhoneNumber() : "");
-        personDb.setPhone1Type(person.getPhone1() != null ? person.getPhone1().getPhoneType() : "");
-        personDb.setPhone1DNC(person.getPhone1() != null && person.getPhone1().isPhoneDNC());
-        personDb.setPhone1Stop(person.getPhone1() != null && person.getPhone1().isPhoneStop());
-        personDb.setPhone1Telco(person.getPhone1() != null ? person.getPhone1().getPhoneTelco() : "");
+        personDao.setPhone1(person.getPhone1() != null ? person.getPhone1().getPhoneNumber() : "");
+        personDao.setPhone1Type(person.getPhone1() != null ? person.getPhone1().getPhoneType() : "");
+        personDao.setPhone1DNC(person.getPhone1() != null && person.getPhone1().isPhoneDNC());
+        personDao.setPhone1Stop(person.getPhone1() != null && person.getPhone1().isPhoneStop());
+        personDao.setPhone1Telco(person.getPhone1() != null ? person.getPhone1().getPhoneTelco() : "");
 
-        personDb.setPhone2(person.getPhone2() != null ? person.getPhone2().getPhoneNumber() : "");
-        personDb.setPhone2Type(person.getPhone2() != null ? person.getPhone2().getPhoneType() : "");
-        personDb.setPhone2DNC(person.getPhone2() != null && person.getPhone2().isPhoneDNC());
-        personDb.setPhone2Stop(person.getPhone2() != null && person.getPhone2().isPhoneStop());
-        personDb.setPhone2Telco(person.getPhone2() != null ? person.getPhone2().getPhoneTelco() : "");
+        personDao.setPhone2(person.getPhone2() != null ? person.getPhone2().getPhoneNumber() : "");
+        personDao.setPhone2Type(person.getPhone2() != null ? person.getPhone2().getPhoneType() : "");
+        personDao.setPhone2DNC(person.getPhone2() != null && person.getPhone2().isPhoneDNC());
+        personDao.setPhone2Stop(person.getPhone2() != null && person.getPhone2().isPhoneStop());
+        personDao.setPhone2Telco(person.getPhone2() != null ? person.getPhone2().getPhoneTelco() : "");
 
-        personDb.setPhone3(person.getPhone3() != null ? person.getPhone3().getPhoneNumber() : "");
-        personDb.setPhone3Type(person.getPhone3() != null ? person.getPhone3().getPhoneType() : "");
-        personDb.setPhone3DNC(person.getPhone3() != null && person.getPhone3().isPhoneDNC());
-        personDb.setPhone3Stop(person.getPhone3() != null && person.getPhone3().isPhoneStop());
-        personDb.setPhone3Telco(person.getPhone3() != null ? person.getPhone3().getPhoneTelco() : "");
+        personDao.setPhone3(person.getPhone3() != null ? person.getPhone3().getPhoneNumber() : "");
+        personDao.setPhone3Type(person.getPhone3() != null ? person.getPhone3().getPhoneType() : "");
+        personDao.setPhone3DNC(person.getPhone3() != null && person.getPhone3().isPhoneDNC());
+        personDao.setPhone3Stop(person.getPhone3() != null && person.getPhone3().isPhoneStop());
+        personDao.setPhone3Telco(person.getPhone3() != null ? person.getPhone3().getPhoneTelco() : "");
 
-        personDb.setEmail1(person.getEmail1());
-        personDb.setEmail2(person.getEmail2());
-        personDb.setEmail3(person.getEmail3());
+        personDao.setEmail1(person.getEmail1());
+        personDao.setEmail2(person.getEmail2());
+        personDao.setEmail3(person.getEmail3());
 
         for(Property property : person.getPropertyList()) {
-            PropertyDb propertyDb = saveOrUpdateProperty(property, session);
-            personDb.addProperty(propertyDb);
+            PropertyDao propertyDao = saveOrUpdateProperty(property, session);
+            personDao.addProperty(propertyDao);
         }
     }
 
-    private ColdRvmLeadDb fillColdRvmLeadDbFromColdRvmLead(ColdRvmLead coldRvmLead, ColdRvmLeadDb coldRvmLeadDb,
-                                                           Session session) {
-        coldRvmLeadDb.setNaturalId(coldRvmLead.getNaturalId());
-        coldRvmLeadDb.setDateWorkflowStarted(coldRvmLead.getDateWorkflowStarted());
-        coldRvmLeadDb.setConversationStarted(coldRvmLead.isConversationStarted());
-        coldRvmLeadDb.setToldToStop(coldRvmLead.isToldToStop());
-        coldRvmLeadDb.setSold(coldRvmLead.isSold());
-        coldRvmLeadDb.setWrongNumber(coldRvmLead.isWrongNumber());
-        coldRvmLeadDb.setOfferMade(coldRvmLead.isOfferMade());
-        coldRvmLeadDb.setLeadSentToAgent(coldRvmLead.isLeadSentToAgent());
+    private ColdRvmLeadDao fillColdRvmLeadDbFromColdRvmLead(ColdRvmLead coldRvmLead, ColdRvmLeadDao coldRvmLeadDao,
+                                                            Session session) {
+        coldRvmLeadDao.setNaturalId(coldRvmLead.getNaturalId());
+        coldRvmLeadDao.setDateWorkflowStarted(coldRvmLead.getDateWorkflowStarted());
+        coldRvmLeadDao.setConversationStarted(coldRvmLead.isConversationStarted());
+        coldRvmLeadDao.setToldToStop(coldRvmLead.isToldToStop());
+        coldRvmLeadDao.setSold(coldRvmLead.isSold());
+        coldRvmLeadDao.setWrongNumber(coldRvmLead.isWrongNumber());
+        coldRvmLeadDao.setOfferMade(coldRvmLead.isOfferMade());
+        coldRvmLeadDao.setLeadSentToAgent(coldRvmLead.isLeadSentToAgent());
 
-        coldRvmLeadDb.setPerson(saveOrUpdatePerson(coldRvmLead.getPerson(), session));
+        coldRvmLeadDao.setPerson(saveOrUpdatePerson(coldRvmLead.getPerson(), session));
 
-        coldRvmLeadDb.setProperty(saveOrUpdateProperty(coldRvmLead.getProperty(), session));
+        coldRvmLeadDao.setProperty(saveOrUpdateProperty(coldRvmLead.getProperty(), session));
 
-        return coldRvmLeadDb;
+        return coldRvmLeadDao;
     }
 
-    private PropertyDb saveOrUpdateProperty(Property property, Session session) {
+    private PropertyDao saveOrUpdateProperty(Property property, Session session) {
         //
         //Search for property - or create new one
         //
-        PropertyDb propertyDb = session.byNaturalId(PropertyDb.class)
+        PropertyDao propertyDao = session.byNaturalId(PropertyDao.class)
                 .using("naturalId", property.getNaturalId())
                 .load();
-        if (propertyDb == null) {
-            propertyDb = new PropertyDb();
+        if (propertyDao == null) {
+            propertyDao = new PropertyDao();
         }
 
         //
         //Fill in data
         //
-        fillPropertyDbFromProperty(property, propertyDb);
+        fillPropertyDbFromProperty(property, propertyDao);
 
         //
         //Save / Update Property
         //
-        session.saveOrUpdate(propertyDb);
+        session.saveOrUpdate(propertyDao);
 
-        return propertyDb;
+        return propertyDao;
     }
 
-    private PersonDb saveOrUpdatePerson(Person person, Session session) {
+    private PersonDao saveOrUpdatePerson(Person person, Session session) {
         //
         //Search for property - or create new one
         //
-        PersonDb personDb = session.byNaturalId(PersonDb.class)
+        PersonDao personDao = session.byNaturalId(PersonDao.class)
                 .using("naturalId", person.getNaturalId())
                 .load();
-        if (personDb == null) {
-            personDb = new PersonDb();
+        if (personDao == null) {
+            personDao = new PersonDao();
         }
 
         //
         //Fill in data
         //
-        fillPersonDbFromPerson(person, personDb, session);
+        fillPersonDbFromPerson(person, personDao, session);
 
         //
         //Save / Update Property
         //
-        session.saveOrUpdate(personDb);
+        session.saveOrUpdate(personDao);
 
-        return personDb;
+        return personDao;
     }
 
-    private ColdRvmLeadDb saveOrUpdateColdRvmLead(ColdRvmLead coldRvmLead, Session session) {
+    private ColdRvmLeadDao saveOrUpdateColdRvmLead(ColdRvmLead coldRvmLead, Session session) {
         //
         //Search for ColdRvmLead - or create new one
         //
-        ColdRvmLeadDb coldRvmLeadDb =  session.byNaturalId(ColdRvmLeadDb.class)
+        ColdRvmLeadDao coldRvmLeadDao =  session.byNaturalId(ColdRvmLeadDao.class)
                 .using("naturalId", coldRvmLead.getNaturalId())
                 .load();
-        if (coldRvmLeadDb == null) {
-            coldRvmLeadDb = new ColdRvmLeadDb();
+        if (coldRvmLeadDao == null) {
+            coldRvmLeadDao = new ColdRvmLeadDao();
         }
 
         //
         //Fill in data
         //
-        fillColdRvmLeadDbFromColdRvmLead(coldRvmLead, coldRvmLeadDb, session);
+        fillColdRvmLeadDbFromColdRvmLead(coldRvmLead, coldRvmLeadDao, session);
 
         //
         //Save / Update Property
         //
-        session.saveOrUpdate(coldRvmLeadDb);
+        session.saveOrUpdate(coldRvmLeadDao);
 
-        return coldRvmLeadDb;
+        return coldRvmLeadDao;
     }
 }

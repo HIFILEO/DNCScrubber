@@ -24,7 +24,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "Property")
-public class PropertyDb {
+public class PropertyDao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -93,7 +93,7 @@ public class PropertyDb {
     https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    private PersonDb person;
+    private PersonDao person;
 
     /*
     Note - The child entity, PropertyDb, implement the equals and hashCode methods. Since we cannot rely on a natural
@@ -105,8 +105,8 @@ public class PropertyDb {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PropertyDb )) return false;
-        return id != null && id.equals(((PropertyDb) o).getId());
+        if (!(o instanceof PropertyDao)) return false;
+        return id != null && id.equals(((PropertyDao) o).getId());
     }
 
     @Override
@@ -118,11 +118,11 @@ public class PropertyDb {
         return id;
     }
 
-    public void setPerson(PersonDb personDb) {
-        person = personDb;
+    public void setPerson(PersonDao personDao) {
+        person = personDao;
     }
 
-    public PersonDb getPerson() {
+    public PersonDao getPerson() {
         return person;
     }
 

@@ -24,7 +24,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "ColdRvmLead")
-public class ColdRvmLeadDb {
+public class ColdRvmLeadDao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,11 +51,11 @@ public class ColdRvmLeadDb {
      */
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="Person_id")
-    private PersonDb person;
+    private PersonDao person;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="Property_id")
-    private PropertyDb property;
+    private PropertyDao property;
 
     public Date getDateWorkflowStarted() {
         return dateWorkflowStarted;
@@ -113,19 +113,19 @@ public class ColdRvmLeadDb {
         this.leadSentToAgent = leadSentToAgent;
     }
 
-    public PersonDb getPerson() {
+    public PersonDao getPerson() {
         return person;
     }
 
-    public void setPerson(PersonDb person) {
+    public void setPerson(PersonDao person) {
         this.person = person;
     }
 
-    public PropertyDb getProperty() {
+    public PropertyDao getProperty() {
         return property;
     }
 
-    public void setProperty(PropertyDb property) {
+    public void setProperty(PropertyDao property) {
         this.property = property;
     }
 

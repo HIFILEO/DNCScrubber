@@ -26,7 +26,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "Person")
-public class PersonDb {
+public class PersonDao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -82,7 +82,7 @@ public class PersonDb {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "Property_id")
-    private List<PropertyDb> properties = new ArrayList<PropertyDb>();
+    private List<PropertyDao> properties = new ArrayList<PropertyDao>();
 
     /*
         The parent entity, Person, features two utility methods which are used to synchronize both sides of the
@@ -91,20 +91,20 @@ public class PersonDb {
          https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
      */
     /**
-     * Add {@link PropertyDb} to Person
-     * @param propertyDb - Property owned
+     * Add {@link PropertyDao} to Person
+     * @param propertyDao - Property owned
      */
-    public void addProperty(PropertyDb propertyDb) {
-        properties.add(propertyDb);
-        propertyDb.setPerson(this);
+    public void addProperty(PropertyDao propertyDao) {
+        properties.add(propertyDao);
+        propertyDao.setPerson(this);
     }
 
-    public void removeProperty(PropertyDb propertyDb) {
-        properties.remove(propertyDb);
-        propertyDb.setPerson(null);
+    public void removeProperty(PropertyDao propertyDao) {
+        properties.remove(propertyDao);
+        propertyDao.setPerson(null);
     }
 
-    public List<PropertyDb> getProperties() {
+    public List<PropertyDao> getProperties() {
         return properties;
     }
 

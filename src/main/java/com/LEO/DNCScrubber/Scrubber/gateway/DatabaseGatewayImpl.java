@@ -16,16 +16,9 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import com.LEO.DNCScrubber.Scrubber.gateway.model.ColdRvmLeadDb;
-import com.LEO.DNCScrubber.Scrubber.gateway.model.PersonDb;
-import com.LEO.DNCScrubber.Scrubber.gateway.model.PropertyDb;
 import com.LEO.DNCScrubber.Scrubber.model.data.ColdRvmLead;
-import com.LEO.DNCScrubber.Scrubber.model.data.Person;
-import com.LEO.DNCScrubber.Scrubber.model.data.Property;
 import com.LEO.DNCScrubber.core.hibernate.HibernateUtil;
 import io.reactivex.Observable;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
