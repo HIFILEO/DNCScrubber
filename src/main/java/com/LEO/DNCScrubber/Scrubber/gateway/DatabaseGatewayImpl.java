@@ -27,8 +27,6 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-
 /**
  * {@link DatabaseGateway} implementation using Hibernate. https://hibernate.org/
  */
@@ -54,27 +52,74 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
     @Override
     public Observable<ColdRvmLead> loadColdRvmLeadByNaturalId(String naturalId) {
         Transaction transaction = null;
+        ColdRvmLeadDao coldRvmLeadDao = null;
         try (Session session = hibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
 
-            ColdRvmLeadDao coldRvmLeadDao = session.byNaturalId(ColdRvmLeadDao.class)
+            coldRvmLeadDao = session.byNaturalId(ColdRvmLeadDao.class)
                     .using("naturalId", naturalId)
                     .load();
-        } catch (Exception exception){
 
+        } catch (Exception exception){
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            logger.error("Load ColdRvmLeadDao threw an exception. Ignoring - return empty. Error - []", exception);
         }
 
-            return null;
+        if (coldRvmLeadDao == null) {
+            return Observable.empty();
+        } else {
+            return Observable.just(this.convertToColdRvmLead(coldRvmLeadDao));
+        }
     }
 
     @Override
     public Observable<Person> loadPersonByNaturalId(String naturalId) {
-        return null;
+        Transaction transaction = null;
+        PersonDao personDao = null;
+        try (Session session = hibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+
+            personDao = session.byNaturalId(PersonDao.class)
+                    .using("naturalId", naturalId)
+                    .load();
+        } catch (Exception exception){
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            logger.error("Load PersonDao threw an exception. Ignoring - return empty. Error - []", exception);
+        }
+
+        if (personDao == null) {
+            return Observable.empty();
+        } else {
+            return Observable.just(this.convertToPerson(personDao));
+        }
     }
 
     @Override
     public Observable<Property> loadPropertyByNaturalId(String naturalId) {
-        return null;
+        Transaction transaction = null;
+        PropertyDao propertyDao = null;
+        try (Session session = hibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+
+            propertyDao = session.byNaturalId(PropertyDao.class)
+                    .using("naturalId", naturalId)
+                    .load();
+        } catch (Exception exception){
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            logger.error("Load PropertyDoa threw an exception. Ignoring - return empty. Error - []", exception);
+        }
+
+        if (propertyDao == null) {
+            return Observable.empty();
+        } else {
+            return Observable.just(this.convertToProperty(propertyDao));
+        }
     }
 
     /**
@@ -92,7 +137,7 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         coldRvmLead.setOfferMade(coldRvmLeadDao.isOfferMade());
         coldRvmLead.setLeadSentToAgent(coldRvmLeadDao.isLeadSentToAgent());
         coldRvmLead.setPerson(convertToPerson(coldRvmLeadDao.getPerson()));
-        coldRvmLead.setProperty(covertToProperty(coldRvmLeadDao.getProperty()));
+        coldRvmLead.setProperty(convertToProperty(coldRvmLeadDao.getProperty()));
 
         return coldRvmLead;
     }
@@ -148,7 +193,7 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         person.setEmail3(personDao.getEmail3());
 
         for (PropertyDao propertyDao : personDao.getProperties()) {
-            person.addProperty(covertToProperty(propertyDao));
+            person.addProperty(convertToProperty(propertyDao));
         }
 
         return person;
@@ -159,7 +204,7 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
      * @param propertyDao
      * @return
      */
-    private Property covertToProperty(PropertyDao propertyDao) {
+    private Property convertToProperty(PropertyDao propertyDao) {
         Address address = new Address();
         address.setMailingAddress(propertyDao.getAddress());
         address.setUnitNumber(propertyDao.getUnitNumber());
@@ -179,7 +224,7 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         property.setBedrooms(propertyDao.getBedrooms());
         property.setTotalBathrooms(propertyDao.getTotalBathrooms());
         property.setSqft(propertyDao.getSqft());
-        property.setLoftSizeSqft(propertyDao.getLoftSizeSqft());
+        property.setLotSizeSqft(propertyDao.getLoftSizeSqft());
         property.setYearBuilt(propertyDao.getYearBuilt());
         property.setAssessedValue(propertyDao.getAssessedValue());
         property.setLastSaleRecordingDate(propertyDao.getLastSaleRecordingDate());

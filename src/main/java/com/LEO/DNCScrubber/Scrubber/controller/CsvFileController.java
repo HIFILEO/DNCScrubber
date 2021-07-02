@@ -17,6 +17,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import io.reactivex.Observable;
 
 import java.io.File;
@@ -27,9 +28,9 @@ import java.io.File;
 public interface CsvFileController {
 
     /**
-     * Reads the given CSV file and returns each line as it's own {@link RawLeadCsv} object
-     * @param file - a CSV file that conforms to the {@link RawLeadCsv}
-     * @return {@link RawLeadCsv} until EOF is reached, then On Complete is called. Will throw OnError.
+     * Reads the given CSV file and returns each line as it's own {@link RawLead} object
+     * @param file - a CSV file that conforms to the {@link RawLead}
+     * @return {@link RawLead} until EOF is reached, then On Complete is called. Will throw OnError.
      */
-    Observable<RawLeadCsv> readRawLeads(File file);
+    Observable<RawLead> readRawLeads(File file);
 }

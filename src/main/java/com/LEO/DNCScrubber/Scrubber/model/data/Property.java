@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 import java.util.Date;
 
 /**
- * Represents a property class.
+ * Represents a business layer property class.
  */
 public class Property {
     private Address address;
@@ -32,7 +32,7 @@ public class Property {
     private String bedrooms = "";
     private String totalBathrooms = "";
     private int sqft;
-    private int loftSizeSqft;
+    private int lotSizeSqft;
     private int yearBuilt;
     private int assessedValue;
     private Date lastSaleRecordingDate = new Date();
@@ -119,12 +119,12 @@ public class Property {
         this.sqft = sqft;
     }
 
-    public int getLoftSizeSqft() {
-        return loftSizeSqft;
+    public int getLotSizeSqft() {
+        return lotSizeSqft;
     }
 
-    public void setLoftSizeSqft(int loftSizeSqft) {
-        this.loftSizeSqft = loftSizeSqft;
+    public void setLotSizeSqft(int lotSizeSqft) {
+        this.lotSizeSqft = lotSizeSqft;
     }
 
     public int getYearBuilt() {
@@ -232,6 +232,10 @@ public class Property {
     }
 
     public String getNaturalId() {
+        if (address.getMailingAddress().isEmpty() && address.getUnitNumber().isEmpty()) {
+            return "";
+        }
+
         return address.getMailingAddress() + "~" + address.getUnitNumber();
     }
 }

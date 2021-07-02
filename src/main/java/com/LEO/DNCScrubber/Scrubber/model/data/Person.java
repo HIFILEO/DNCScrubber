@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a home owner. Named Person accordingly since a home owner could be a company and we deal w/ people.
+ * Represents a business layer home owner. Named Person accordingly since a home owner could be a company and we deal w/ people.
  *
  * Note - A person might own multiple properties but depending where we load the data from the list might oly contain 1
  * ie - CSV typically 1 to 1
@@ -124,6 +124,10 @@ public class Person {
     }
 
     public String getNaturalId() {
-        return firstName + "~" + lastName + "~" + address;
+        if (firstName.isEmpty() && lastName.isEmpty() && address.getMailingAddress().isEmpty()) {
+            return "";
+        }
+
+        return firstName + "~" + lastName + "~" + address.getMailingAddress();
     }
 }

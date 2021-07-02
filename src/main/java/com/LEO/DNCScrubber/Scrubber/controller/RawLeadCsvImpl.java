@@ -17,12 +17,13 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 
 import java.util.Date;
 
-public class RawLeadCsvCVSImp implements RawLeadCsv {
+public class RawLeadCsvImpl implements RawLead {
 
     @CsvBindByName(column = "Address", required = true)
     private String address;
@@ -43,7 +44,7 @@ public class RawLeadCsvCVSImp implements RawLeadCsv {
     private String county;
 
     @CsvBindByName(column = "APN", required = true)
-    private String aBN;
+    private String aPN;
 
     @CsvBindByName(column = "Owner Occupied", required = true)
     private boolean ownerOccupied;
@@ -56,6 +57,9 @@ public class RawLeadCsvCVSImp implements RawLeadCsv {
 
     @CsvBindByName(column = "Company Name", required = true)
     private String companyName;
+
+    @CsvBindByName(column = "Company Address", required = true)
+    private String companyAddress;
 
     @CsvBindByName(column = "Owner 2 First Name", required = true)
     private String ownerTwoFirstName;
@@ -181,8 +185,8 @@ public class RawLeadCsvCVSImp implements RawLeadCsv {
     }
 
     @Override
-    public String getABN() {
-        return this.aBN;
+    public String getAPN() {
+        return this.aPN;
     }
 
     @Override
@@ -203,6 +207,11 @@ public class RawLeadCsvCVSImp implements RawLeadCsv {
     @Override
     public String getCompanyName() {
         return this.companyName;
+    }
+
+    @Override
+    public String getCompanyAddress() {
+        return this.companyAddress;
     }
 
     @Override

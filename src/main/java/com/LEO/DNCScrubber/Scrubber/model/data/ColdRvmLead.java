@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 import java.util.Date;
 
 /**
- * Represents a cold rvm lead. This is one person we are trying to reach about a specific property.
+ * Represents a business layer cold rvm lead. This is one person we are trying to reach about a specific property.
  */
 public class ColdRvmLead {
     private Date dateWorkflowStarted = new Date();
@@ -106,17 +106,17 @@ public class ColdRvmLead {
     }
 
     public String getNaturalId() {
-        String personNaturalId = "";
-        String propertyNaturalId = "";
+        StringBuilder stringBuilder = new StringBuilder();
 
         if (property != null) {
-            personNaturalId = person.getNaturalId();
+            stringBuilder.append(person.getNaturalId());
         }
 
         if (property != null) {
-            propertyNaturalId = property.getNaturalId();
+            stringBuilder.append("~");
+            stringBuilder.append(property.getNaturalId());
         }
 
-        return personNaturalId + "~" + propertyNaturalId;
+        return stringBuilder.toString();
     }
 }

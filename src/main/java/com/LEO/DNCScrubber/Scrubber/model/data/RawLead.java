@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.controller;/*
+package com.LEO.DNCScrubber.Scrubber.model.data;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -18,18 +18,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 import java.util.Date;
 
-public interface RawLeadCsv {
+/**
+ * Business layer representation of a raw lead.
+ */
+public interface RawLead {
     String getAddress();
     String getUnitNumber();
     String getCity();
     String getState();
     String getZip();
     String getCounty();
-    String getABN();
+    String getAPN();
     boolean isOwnerOccupied();
     String getOwnerOneFirstName();
     String getOwnerOneLastName();
     String getCompanyName();
+    String getCompanyAddress();
     String getOwnerTwoFirstName();
     String getOwnerTwoLastName();
     String getMailingCareOfName();

@@ -103,7 +103,7 @@ public class ColdRvmLeadHandler {
         propertyDao.setBedrooms(property.getBedrooms());
         propertyDao.setTotalBathrooms(property.getTotalBathrooms());
         propertyDao.setSqft(property.getSqft());
-        propertyDao.setLoftSizeSqft(property.getLoftSizeSqft());
+        propertyDao.setLoftSizeSqft(property.getLotSizeSqft());
         propertyDao.setYearBuilt(property.getYearBuilt());
         propertyDao.setAssessedValue(property.getAssessedValue());
 
