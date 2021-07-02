@@ -124,10 +124,13 @@ public class Person {
     }
 
     public String getNaturalId() {
-        if (firstName.isEmpty() && lastName.isEmpty() && address.getMailingAddress().isEmpty()) {
+        if (firstName.isEmpty() && lastName.isEmpty() && (address == null || address.getMailingAddress().isEmpty())) {
             return "";
         }
 
-        return firstName + "~" + lastName + "~" + address.getMailingAddress();
+        String noSpacesFirstName = firstName.replaceAll("\\s+","");
+        String noSpacesLastName = lastName.replaceAll("\\s+","");
+        String noSpacesAddress = address.getMailingAddress().replaceAll("\\s+","");
+        return noSpacesFirstName + "~" + noSpacesLastName + "~" + noSpacesAddress;
     }
 }

@@ -232,10 +232,12 @@ public class Property {
     }
 
     public String getNaturalId() {
-        if (address.getMailingAddress().isEmpty() && address.getUnitNumber().isEmpty()) {
+        if (address == null || address.getMailingAddress().isEmpty()) {
             return "";
         }
 
-        return address.getMailingAddress() + "~" + address.getUnitNumber();
+        String noSpacesAddress = address.getMailingAddress().replaceAll("\\s+","");
+        String noSpacesCity = address.getCity().replaceAll("\\s+","");
+        return noSpacesAddress + "~" + noSpacesCity;
     }
 }

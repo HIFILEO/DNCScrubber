@@ -107,11 +107,6 @@ public class LoadRawDataInteractor {
         @Override
         public ColdRvmLead apply(Person personFromDatabase, Property propertyFromDatabase) throws Exception {
             //
-            //Setup
-            //
-            databaseStatus.newColdRvmLeadSaved = true;
-
-            //
             //Address Property
             //If the property exists in the database, do nothing. Reuse it.
             //
@@ -123,6 +118,7 @@ public class LoadRawDataInteractor {
 
             //
             //Address Person
+            //If the person exists in the database, check for property link.
             //
             if (!personFromDatabase.getNaturalId().isEmpty()) {
                 logger.info("Person {} exists. Reuse for cold lead", personFromDatabase.getNaturalId());
@@ -215,6 +211,10 @@ public class LoadRawDataInteractor {
     protected static class StoreRawLeadFlatMap implements Function<RawLead, ObservableSource<DatabaseStatus>> {
         private final DatabaseGateway databaseGateway;
 
+        /**
+         * Constructor -
+         * @param databaseGateway -
+         */
         public StoreRawLeadFlatMap(DatabaseGateway databaseGateway) {
             this.databaseGateway = databaseGateway;
         }
@@ -230,7 +230,6 @@ public class LoadRawDataInteractor {
                         @Override
                         public ObservableSource<DatabaseStatus> apply(ColdRvmLead coldRvmLead) throws Exception {
                             //ColdRvmLead exists - we don't update raw leads
-                            DatabaseStatus databaseStatus = new DatabaseStatus();
                             databaseStatus.duplicateColdRvmEntry = true;
                             databaseStatus.duplicatePerson = true;
                             databaseStatus.duplicateProperty = true;
