@@ -130,7 +130,8 @@ public class LoadRawDataInteractor {
                 //check property and see if they own it, if not add it.
                 boolean propertyFound = false;
                 for(Property propertyInPerson : personFromDatabase.getPropertyList()) {
-                    if ( propertyInPerson.getNaturalId().equalsIgnoreCase(coldRvmLeadToProcess.getProperty().getNaturalId())) {
+                    if (propertyInPerson.getNaturalId().equalsIgnoreCase(
+                            coldRvmLeadToProcess.getProperty().getNaturalId())) {
                         propertyFound = true;
                         break;
                     }
@@ -239,8 +240,10 @@ public class LoadRawDataInteractor {
                     }).switchIfEmpty(
                             //No ColdRvmLead, use coldRvmLeadToProcess. Fetch person and property from DB process
                             Observable.zip(
-                                    databaseGateway.loadPersonByNaturalId(coldRvmLeadToProcess.getPerson().getNaturalId()).switchIfEmpty(Observable.just(new Person())),
-                                    databaseGateway.loadPropertyByNaturalId(coldRvmLeadToProcess.getProperty().getNaturalId()).switchIfEmpty(Observable.just(new Property())),
+                                    databaseGateway.loadPersonByNaturalId(coldRvmLeadToProcess.getPerson().getNaturalId())
+                                            .switchIfEmpty(Observable.just(new Person())),
+                                    databaseGateway.loadPropertyByNaturalId(coldRvmLeadToProcess.getProperty().getNaturalId())
+                                            .switchIfEmpty(Observable.just(new Property())),
                                     new ColdRvmLeadProcessor(coldRvmLeadToProcess, databaseStatus)
                             ).flatMap(new Function<ColdRvmLead, ObservableSource<Boolean>>() {
                                 @Override
@@ -264,11 +267,11 @@ public class LoadRawDataInteractor {
             BiFunction<DatabaseStatusCounter, DatabaseStatus, DatabaseStatusCounter> {
 
         @Override
-        public DatabaseStatusCounter apply(DatabaseStatusCounter databaseStatusCounter, DatabaseStatus databaseStatus) throws Exception {
+        public DatabaseStatusCounter apply(DatabaseStatusCounter databaseStatusCounter, DatabaseStatus databaseStatus) {
             if (databaseStatus.duplicateColdRvmEntry) {
-                databaseStatusCounter.numberOfColdLeadsAdded++;
-            } else if (databaseStatus.newColdRvmLeadSaved) {
                 databaseStatusCounter.numberOfColdLeadDuplicates++;
+            } else if (databaseStatus.newColdRvmLeadSaved) {
+                databaseStatusCounter.numberOfColdLeadsAdded++;
             }
 
             return databaseStatusCounter;

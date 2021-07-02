@@ -19,14 +19,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 
 import com.LEO.DNCScrubber.rx.RxJavaTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
 public class LoadRawDataInteractorTest extends RxJavaTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         super.setUp();
         initMocks(this);
@@ -62,20 +63,33 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
     }
 
     @Test
-    public void DatabaseStatusCounterScanner_addNew() {
+    public void DatabaseStatusCounterScanner_addNew() throws Exception {
         //
         //Arrange
         //
         LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScanner =
                 new LoadRawDataInteractor.DatabaseStatusCounterScanner();
 
+        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter =
+                new LoadRawDataInteractor.DatabaseStatusCounter();
+        databaseStatusCounter.numberOfColdLeadDuplicates = 10;
+        databaseStatusCounter.numberOfColdLeadsAdded = 9;
+
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
+        databaseStatus.duplicateColdRvmEntry = false;
+        databaseStatus.newColdRvmLeadSaved = true;
+
         //
         //Act
         //
+        LoadRawDataInteractor.DatabaseStatusCounter counterToTest =
+                databaseStatusCounterScanner.apply(databaseStatusCounter, databaseStatus);
 
         //
         //Assert
         //
+        assertThat(counterToTest.numberOfColdLeadDuplicates).isEqualTo(10);
+        assertThat(counterToTest.numberOfColdLeadsAdded).isEqualTo(10);
     }
 
 }

@@ -56,7 +56,7 @@ dependencies {
     implementation("com.google.guava:guava:30.1.1-jre")
 
     //Unit Test
-    testImplementation 'junit:junit:4.12'
+   // testImplementation 'junit:junit:4.12'
     testImplementation 'org.apache.maven:maven-ant-tasks:2.1.3'
     testImplementation 'org.mockito:mockito-core:2.6.2'
     testImplementation 'org.assertj:assertj-core:2.6.0'
@@ -68,9 +68,9 @@ dependencies {
     antTask 'com.jetbrains.intellij.java:java-compiler-ant-tasks:203.7148.30'
 }
 
-//test {
-//    useJUnitPlatform()
-//}
+test {
+    useJUnitPlatform()
+}
 
 application {
     mainClass = 'com.LEO.DNCScrubber.core.application.DncScrubberApplication'

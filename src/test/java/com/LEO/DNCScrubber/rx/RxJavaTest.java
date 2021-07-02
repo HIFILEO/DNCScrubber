@@ -17,16 +17,13 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import org.assertj.core.util.VisibleForTesting;
-import org.junit.Before;
-import org.junit.experimental.categories.Category;
-
-import java.util.concurrent.Callable;
 
 import io.reactivex.Scheduler;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.TestScheduler;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Base class for all tests that use RxJava
@@ -35,7 +32,7 @@ public abstract class RxJavaTest {
     @VisibleForTesting
     protected TestScheduler testScheduler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         RxJavaPlugins.reset();
         testScheduler = new TestScheduler();
