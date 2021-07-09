@@ -50,7 +50,7 @@ public class LoadRawLeadsResult extends Result {
                                              int numberOfColdLeadErrors) {
         return new LoadRawLeadsResult(Result.ResultType.SUCCESS, false,
                 "", false, false, numberOfColdLeadDuplicates,
-                numberOfColdLeadsSaved, numberOfColdLeadsSaved);
+                numberOfColdLeadsSaved, numberOfColdLeadErrors);
     }
 
     public static LoadRawLeadsResult error(String errorMessage, boolean fileLoadError) {

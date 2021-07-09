@@ -18,22 +18,24 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
+import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
 import com.LEO.DNCScrubber.Scrubber.model.data.*;
+import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
+import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import com.LEO.DNCScrubber.rx.RxJavaTest;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.verification.Times;
 
+import java.io.File;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -443,6 +445,191 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         assertThat(databaseStatus.duplicateProperty).isTrue();
     }
 
+    @Test
+    public void LoadRawLeadsObservable_LoadColdLead_Success() throws Exception {
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawLeadsResult> testObserver;
+
+        //Mocks Bitch
+        CsvFileController csvFileControllerMock = Mockito.mock(CsvFileController.class);
+        DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
+        LoadRawLeadsAction loadRawLeadsActionMock = Mockito.mock(LoadRawLeadsAction.class);
+        LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMapMock = Mockito.mock(LoadRawDataInteractor.StoreRawLeadFlatMap.class);
+        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.DatabaseStatusCounterScanner.class));
+
+        //Data Bitch
+        RawLead rawLead = new RawLeadImpl();
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
+        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter = new LoadRawDataInteractor.DatabaseStatusCounter();
+        databaseStatusCounter.numberOfColdLeadsAdded = 1;
+
+        //When it up
+        when(csvFileControllerMock.readRawLeads(any())).thenReturn(Observable.just(rawLead));
+
+        when(storeRawLeadFlatMapMock.apply(rawLead)).thenReturn(Observable.just(databaseStatus));
+
+        when(loadRawLeadsActionMock.getCsvFile()).thenReturn(new File("Do Nothing"));
+
+        when(databaseStatusCounterScannerMock.apply(any(), any())).thenReturn(databaseStatusCounter);
+
+        LoadRawDataInteractor.LoadRawLeadsObservable loadRawLeadsObservable
+                = new LoadRawDataInteractor.LoadRawLeadsObservable(
+                csvFileControllerMock,
+                databaseGatewayMock,
+                loadRawLeadsActionMock,
+                storeRawLeadFlatMapMock,
+                databaseStatusCounterScannerMock
+        );
+
+        //
+        //Act
+        //
+        testObserver = Single.fromObservable(Observable.create(loadRawLeadsObservable)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertNoErrors();
+        testObserver.assertValueCount(1);
+        testObserver.assertComplete();
+
+        LoadRawLeadsResult loadRawLeadsResult = (LoadRawLeadsResult) testObserver.getEvents().get(0).get(0);
+        assertThat(loadRawLeadsResult.getType()).isEqualTo(Result.ResultType.SUCCESS);
+        assertThat(loadRawLeadsResult.isFileLoadError()).isFalse();
+        assertThat(loadRawLeadsResult.isNeedsFileName()).isFalse();
+        assertThat(loadRawLeadsResult.isUserCanceled()).isFalse();
+        assertThat(loadRawLeadsResult.getErrorMessage()).isNullOrEmpty();
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadDuplicates()).isEqualTo(0);
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadErrors()).isEqualTo(0);
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadsSaved()).isEqualTo(1);
+    }
+
+    @Test
+    public void LoadRawLeadsObservable_LoadColdLead_Success_MultipleEntries() throws Exception {
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawLeadsResult> testObserver;
+
+        //Mocks Bitch
+        CsvFileController csvFileControllerMock = Mockito.mock(CsvFileController.class);
+        DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
+        LoadRawLeadsAction loadRawLeadsActionMock = Mockito.mock(LoadRawLeadsAction.class);
+        LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMapMock = Mockito.mock(LoadRawDataInteractor.StoreRawLeadFlatMap.class);
+        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.DatabaseStatusCounterScanner.class));
+
+        //Data Bitch
+        RawLead rawLead = new RawLeadImpl();
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
+        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter = new LoadRawDataInteractor.DatabaseStatusCounter();
+        databaseStatusCounter.numberOfColdLeadsAdded = 2;
+
+        //When it up
+        //Return two leads ...
+        when(csvFileControllerMock.readRawLeads(any())).thenReturn(Observable.just(rawLead, rawLead));
+
+        when(storeRawLeadFlatMapMock.apply(rawLead)).thenReturn(Observable.just(databaseStatus));
+
+        when(loadRawLeadsActionMock.getCsvFile()).thenReturn(new File("Do Nothing"));
+
+        when(databaseStatusCounterScannerMock.apply(any(), any())).thenReturn(databaseStatusCounter);
+
+        LoadRawDataInteractor.LoadRawLeadsObservable loadRawLeadsObservable
+                = new LoadRawDataInteractor.LoadRawLeadsObservable(
+                csvFileControllerMock,
+                databaseGatewayMock,
+                loadRawLeadsActionMock,
+                storeRawLeadFlatMapMock,
+                databaseStatusCounterScannerMock
+        );
+
+        //
+        //Act
+        //
+        testObserver = Single.fromObservable(Observable.create(loadRawLeadsObservable)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertNoErrors();
+        testObserver.assertValueCount(1);
+        testObserver.assertComplete();
+
+        //verify scanner was called twice
+        verify(databaseStatusCounterScannerMock, Mockito.times(2)).apply(any(), any());
+
+        LoadRawLeadsResult loadRawLeadsResult = (LoadRawLeadsResult) testObserver.getEvents().get(0).get(0);
+        assertThat(loadRawLeadsResult.getType()).isEqualTo(Result.ResultType.SUCCESS);
+        assertThat(loadRawLeadsResult.isFileLoadError()).isFalse();
+        assertThat(loadRawLeadsResult.isNeedsFileName()).isFalse();
+        assertThat(loadRawLeadsResult.isUserCanceled()).isFalse();
+        assertThat(loadRawLeadsResult.getErrorMessage()).isNullOrEmpty();
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadDuplicates()).isEqualTo(0);
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadErrors()).isEqualTo(0);
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadsSaved()).isEqualTo(2);
+    }
+
+    @Test
+    public void LoadRawLeadsObservable_LoadColdLead_Error() throws Exception {
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawLeadsResult> testObserver;
+        Throwable throwable = new Throwable("Testing 123");
+
+        //Mocks Bitch
+        CsvFileController csvFileControllerMock = Mockito.mock(CsvFileController.class);
+        DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
+        LoadRawLeadsAction loadRawLeadsActionMock = Mockito.mock(LoadRawLeadsAction.class);
+        LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMapMock = Mockito.mock(LoadRawDataInteractor.StoreRawLeadFlatMap.class);
+        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.DatabaseStatusCounterScanner.class));
+
+        //Data Bitch
+        RawLead rawLead = new RawLeadImpl();
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
+        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter = new LoadRawDataInteractor.DatabaseStatusCounter();
+        databaseStatusCounter.numberOfColdLeadsAdded = 2;
+
+        //When it up
+        //Return two leads ...
+        when(csvFileControllerMock.readRawLeads(any())).thenReturn(Observable.error(throwable));
+
+        when(storeRawLeadFlatMapMock.apply(rawLead)).thenReturn(Observable.just(databaseStatus));
+
+        when(loadRawLeadsActionMock.getCsvFile()).thenReturn(new File("Do Nothing"));
+
+        when(databaseStatusCounterScannerMock.apply(any(), any())).thenReturn(databaseStatusCounter);
+
+        LoadRawDataInteractor.LoadRawLeadsObservable loadRawLeadsObservable
+                = new LoadRawDataInteractor.LoadRawLeadsObservable(
+                csvFileControllerMock,
+                databaseGatewayMock,
+                loadRawLeadsActionMock,
+                storeRawLeadFlatMapMock,
+                databaseStatusCounterScannerMock
+        );
+
+        //
+        //Act
+        //
+        testObserver = Single.fromObservable(Observable.create(loadRawLeadsObservable)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertValueCount(0);
+
+        //verify scanner was called twice
+        verify(storeRawLeadFlatMapMock, Mockito.times(0)).apply(any());
+        verify(databaseStatusCounterScannerMock, Mockito.times(0)).apply(any(), any());
+    }
+
+    //TODO - test processLoadRawLeadsAction for 3 actions - start w/ / error & w/ success
     class RawLeadImpl implements RawLead {
 
         @Override

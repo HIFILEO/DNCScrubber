@@ -56,7 +56,8 @@ public class LoadRawDataInteractor {
         //3 - start with so things update on the UI.
         //4 - I want a message that tells me how many were saved successfully.
         return Observable.create(
-                new LoadRawLeadsObservable(this.csvFileController, this.databaseGateway, loadRawLeadsAction))
+                new LoadRawLeadsObservable(this.csvFileController, this.databaseGateway, loadRawLeadsAction,
+                        new StoreRawLeadFlatMap(databaseGateway), new DatabaseStatusCounterScanner()))
                 .onErrorReturn(new Function<Throwable, LoadRawLeadsResult>() {
                     @Override
                     public LoadRawLeadsResult apply(Throwable throwable) throws Exception {
@@ -80,9 +81,9 @@ public class LoadRawDataInteractor {
     }
 
     public static class DatabaseStatusCounter {
-        int numberOfColdLeadsAdded;
-        int numberOfColdLeadDuplicates;
-        int numberOfErrors;
+        int numberOfColdLeadsAdded=  0;
+        int numberOfColdLeadDuplicates = 0;
+        int numberOfErrors = 0;
     }
 
     /**
@@ -155,7 +156,7 @@ public class LoadRawDataInteractor {
         private final DatabaseGateway databaseGateway;
         private final LoadRawLeadsAction loadRawLeadsAction;
         private StoreRawLeadFlatMap storeRawLeadFlatMap;
-        private DatabaseStatusCounterScanner databaseStatusCounterScanner = new DatabaseStatusCounterScanner();
+        private DatabaseStatusCounterScanner databaseStatusCounterScanner;
 
         /**
          * Constructor
@@ -164,11 +165,13 @@ public class LoadRawDataInteractor {
          * @param loadRawLeadsAction -
          */
         public LoadRawLeadsObservable(CsvFileController csvFileController, DatabaseGateway databaseGateway,
-                                      LoadRawLeadsAction loadRawLeadsAction) {
+                                      LoadRawLeadsAction loadRawLeadsAction, StoreRawLeadFlatMap storeRawLeadFlatMap,
+                                      DatabaseStatusCounterScanner databaseStatusCounterScanner) {
             this.csvFileController = csvFileController;
             this.databaseGateway = databaseGateway;
             this.loadRawLeadsAction = loadRawLeadsAction;
-            storeRawLeadFlatMap = new StoreRawLeadFlatMap(databaseGateway);
+            this.storeRawLeadFlatMap = storeRawLeadFlatMap;
+            this.databaseStatusCounterScanner = databaseStatusCounterScanner;
         }
 
         @Override
