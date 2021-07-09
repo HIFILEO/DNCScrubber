@@ -22,7 +22,6 @@ import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
 import com.LEO.DNCScrubber.Scrubber.model.data.*;
 import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
-import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import com.google.common.annotations.VisibleForTesting;
 import io.reactivex.*;
 import io.reactivex.functions.BiFunction;
@@ -61,11 +60,11 @@ public class LoadRawDataInteractor {
                 .onErrorReturn(new Function<Throwable, LoadRawLeadsResult>() {
                     @Override
                     public LoadRawLeadsResult apply(Throwable throwable) throws Exception {
-                        return new LoadRawLeadsResult(Result.ResultType.FAILURE,
-                                false,
+                        logger.error("LoadRawLeads caught an error - return {}", throwable.getMessage());
+                        return LoadRawLeadsResult.error(
                                 throwable.getMessage(),
-                                false,
-                                loadRawLeadsAction.getCsvFile() == null);
+                                loadRawLeadsAction.getCsvFile() == null
+                                );
             }
         })
                 .startWith(LoadRawLeadsResult.inFlight(true));
@@ -76,11 +75,14 @@ public class LoadRawDataInteractor {
         boolean duplicateColdRvmEntry;
         boolean duplicatePerson;
         boolean duplicateProperty;
+        boolean error;
+        String errorMessage;
     }
 
     public static class DatabaseStatusCounter {
         int numberOfColdLeadsAdded;
         int numberOfColdLeadDuplicates;
+        int numberOfErrors;
     }
 
     /**
@@ -112,7 +114,7 @@ public class LoadRawDataInteractor {
             //
             if (!propertyFromDatabase.getNaturalId().isEmpty()) {
                 logger.info("Property {} exists. Reuse for cold lead", propertyFromDatabase.getNaturalId());
-                databaseStatus.duplicatePerson = true;
+                databaseStatus.duplicateProperty = true;
                 coldRvmLeadToProcess.setProperty(propertyFromDatabase);
             }
 
@@ -122,7 +124,7 @@ public class LoadRawDataInteractor {
             //
             if (!personFromDatabase.getNaturalId().isEmpty()) {
                 logger.info("Person {} exists. Reuse for cold lead", personFromDatabase.getNaturalId());
-                databaseStatus.duplicateProperty = true;
+                databaseStatus.duplicatePerson = true;
                 //check property and see if they own it, if not add it.
                 boolean propertyFound = false;
                 for(Property propertyInPerson : personFromDatabase.getPropertyList()) {
@@ -178,8 +180,13 @@ public class LoadRawDataInteractor {
                     .subscribe(new Consumer<DatabaseStatusCounter>() {
                         @Override
                         public void accept(DatabaseStatusCounter databaseStatusCounter) throws Exception {
-                            emitter.onNext(new LoadRawLeadsResult(Result.ResultType.SUCCESS, false,
-                                    "", false, false));
+
+                            emitter.onNext(LoadRawLeadsResult.success(
+                                    databaseStatusCounter.numberOfColdLeadDuplicates,
+                                    databaseStatusCounter.numberOfColdLeadsAdded,
+                                    databaseStatusCounter.numberOfErrors
+                                    ));
+
                             emitter.onComplete();
                         }
                     });
@@ -255,7 +262,15 @@ public class LoadRawDataInteractor {
                                     databaseStatus.newColdRvmLeadSaved = aBoolean;
                                     return Observable.just(databaseStatus);
                                 }
-                            }));
+                            })).onErrorReturn(new Function<Throwable, DatabaseStatus>() {
+                        @Override
+                        public DatabaseStatus apply(Throwable throwable) throws Exception {
+                            logger.warn("StoreRawLeadFlatMap had some kind of error - {}", databaseStatus.errorMessage);
+                            databaseStatus.error = true;
+                            databaseStatus.errorMessage = throwable.getMessage();
+                            return databaseStatus;
+                        }
+                    });
         }
     }
 
@@ -271,6 +286,8 @@ public class LoadRawDataInteractor {
                 databaseStatusCounter.numberOfColdLeadDuplicates++;
             } else if (databaseStatus.newColdRvmLeadSaved) {
                 databaseStatusCounter.numberOfColdLeadsAdded++;
+            } else if (databaseStatus.error) {
+                databaseStatusCounter.numberOfErrors++;
             }
 
             return databaseStatusCounter;

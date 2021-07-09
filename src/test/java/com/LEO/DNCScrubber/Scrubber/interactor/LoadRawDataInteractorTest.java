@@ -26,15 +26,16 @@ import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.internal.verification.Times;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 public class LoadRawDataInteractorTest extends RxJavaTest {
 
@@ -151,48 +152,108 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
 
     @Test
     public void StoreRawLeadFlatMap_isNewColdRvmLead() throws Exception {
-//        //
-//        //Arrange
-//        //
-//        TestObserver<LoadRawDataInteractor.DatabaseStatus> testObserver;
-//
-//        RawLead rawLead = new RawLeadImpl();
-//        RawLeadConvertor rawLeadConvertor = new RawLeadConvertor();
-//        ColdRvmLead coldRvmLeadToProcess = rawLeadConvertor.convertRawLeadToColdRvmLead(rawLead);
-//
-//        DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
-//        when(databaseGatewayMock.loadColdRvmLeadByNaturalId(anyString()))
-//                .thenReturn(Observable.just(coldRvmLeadToProcess));
-//
-//        //Note - you need to build the stream so can't be null
-//        when(databaseGatewayMock.loadPersonByNaturalId(anyString()))
-//                .thenReturn(Observable.empty());
-//        when(databaseGatewayMock.loadPropertyByNaturalId(anyString()))
-//                .thenReturn(Observable.empty());
-//
-//        LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMap =
-//                new LoadRawDataInteractor.StoreRawLeadFlatMap(databaseGatewayMock);
-//
-//        //
-//        //Act
-//        //
-//        //Note - you need to convert an ObservableSource to a single in order to test
-//        testObserver = Single.fromObservable(storeRawLeadFlatMap.apply(rawLead)).test();
-//        testScheduler.triggerActions();
-//
-//        //
-//        //Assert
-//        //
-//        testObserver.assertNoErrors();
-//        testObserver.assertValueCount(1);
-//
-//        LoadRawDataInteractor.DatabaseStatus databaseStatus = (LoadRawDataInteractor.DatabaseStatus)
-//                testObserver.getEvents().get(0).get(0);
-//        assertThat(databaseStatus).isNotNull();
-//        assertThat(databaseStatus.duplicateColdRvmEntry).isTrue();
-//        assertThat(databaseStatus.duplicatePerson).isTrue();
-//        assertThat(databaseStatus.duplicateProperty).isTrue();
-//        assertThat(databaseStatus.newColdRvmLeadSaved).isFalse();
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawDataInteractor.DatabaseStatus> testObserver;
+
+        RawLead rawLead = new RawLeadImpl();
+        RawLeadConvertor rawLeadConvertor = new RawLeadConvertor();
+        ColdRvmLead coldRvmLeadToProcess = rawLeadConvertor.convertRawLeadToColdRvmLead(rawLead);
+
+        DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
+        when(databaseGatewayMock.loadColdRvmLeadByNaturalId(anyString()))
+                .thenReturn(Observable.empty());
+
+        when(databaseGatewayMock.writeColdRvmLead(any())).thenReturn(Observable.just(true));
+
+        //Note - you need to build the stream so can't be null
+        when(databaseGatewayMock.loadPersonByNaturalId(anyString()))
+                .thenReturn(Observable.empty());
+        when(databaseGatewayMock.loadPropertyByNaturalId(anyString()))
+                .thenReturn(Observable.empty());
+
+        LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMap =
+                new LoadRawDataInteractor.StoreRawLeadFlatMap(databaseGatewayMock);
+
+        //
+        //Act
+        //
+        //Note - you need to convert an ObservableSource to a single in order to test
+        testObserver = Single.fromObservable(storeRawLeadFlatMap.apply(rawLead)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertNoErrors();
+        testObserver.assertValueCount(1);
+
+        //assert we saved to database - Note - what we saved covered in other tests
+        verify(databaseGatewayMock, Mockito.times(1)).writeColdRvmLead(any());
+
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = (LoadRawDataInteractor.DatabaseStatus)
+                testObserver.getEvents().get(0).get(0);
+        assertThat(databaseStatus).isNotNull();
+        assertThat(databaseStatus.duplicateColdRvmEntry).isFalse();
+        assertThat(databaseStatus.duplicatePerson).isFalse();
+        assertThat(databaseStatus.duplicateProperty).isFalse();
+        assertThat(databaseStatus.newColdRvmLeadSaved).isTrue();
+    }
+
+    @Test
+    public void StoreRawLeadFlatMap_databaseThrowError() throws Exception {
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawDataInteractor.DatabaseStatus> testObserver;
+
+        final String testing123 = "testing 123";
+
+        RawLead rawLead = new RawLeadImpl();
+        RawLeadConvertor rawLeadConvertor = new RawLeadConvertor();
+        ColdRvmLead coldRvmLeadToProcess = rawLeadConvertor.convertRawLeadToColdRvmLead(rawLead);
+
+        DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
+        when(databaseGatewayMock.loadColdRvmLeadByNaturalId(anyString()))
+                .thenReturn(Observable.empty());
+
+        when(databaseGatewayMock.writeColdRvmLead(any())).thenReturn(Observable.error(new Throwable(testing123)));
+
+        //Note - you need to build the stream so can't be null
+        when(databaseGatewayMock.loadPersonByNaturalId(anyString()))
+                .thenReturn(Observable.empty());
+        when(databaseGatewayMock.loadPropertyByNaturalId(anyString()))
+                .thenReturn(Observable.empty());
+
+        LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMap =
+                new LoadRawDataInteractor.StoreRawLeadFlatMap(databaseGatewayMock);
+
+        //
+        //Act
+        //
+        //Note - you need to convert an ObservableSource to a single in order to test
+        testObserver = Single.fromObservable(storeRawLeadFlatMap.apply(rawLead)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertNoErrors();
+        testObserver.assertValueCount(1);
+
+        //assert we saved to database - Note - what we saved covered in other tests
+        verify(databaseGatewayMock, Mockito.times(1)).writeColdRvmLead(any());
+
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = (LoadRawDataInteractor.DatabaseStatus)
+                testObserver.getEvents().get(0).get(0);
+        assertThat(databaseStatus).isNotNull();
+        assertThat(databaseStatus.duplicateColdRvmEntry).isFalse();
+        assertThat(databaseStatus.duplicatePerson).isFalse();
+        assertThat(databaseStatus.duplicateProperty).isFalse();
+        assertThat(databaseStatus.newColdRvmLeadSaved).isFalse();
+        assertThat(databaseStatus.error).isTrue();
+        assertThat(databaseStatus.errorMessage).isEqualTo(testing123);
     }
 
     @Test
@@ -230,7 +291,108 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
     }
 
     @Test
-    public void ColdRvmLeadProcessor_duplicatePropertyAndPerson() throws Exception {
+    public void ColdRvmLeadProcessor_PropertyExistsPersonNew() throws Exception {
+        //
+        //Arrange
+        //
+        Address address = new Address();
+        address.setMailingAddress("123 Ave");
+
+        Person personFromDatabase = new Person();
+
+        Property propertyFromDatabase = new Property();
+        propertyFromDatabase.setAddress(address);
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
+
+        ColdRvmLead coldRvmLeadMock = Mockito.mock(ColdRvmLead.class);
+
+        LoadRawDataInteractor.ColdRvmLeadProcessor coldRvmLeadProcessor =
+                new LoadRawDataInteractor.ColdRvmLeadProcessor(coldRvmLeadMock, databaseStatus);
+
+        //
+        //Act
+        //
+        ColdRvmLead coldRvmLeadReturned = coldRvmLeadProcessor.apply(personFromDatabase, propertyFromDatabase);
+
+        //
+        //Assert
+        //
+        //Same objects should be returned
+        assertThat(coldRvmLeadReturned).isEqualTo(coldRvmLeadMock);
+
+        //Add the database property
+        verify(coldRvmLeadMock, Mockito.times(1)).setProperty(propertyFromDatabase);
+
+        //No addition from Person
+        verify(coldRvmLeadMock, Mockito.times(0)).setPerson(any());
+
+        //test databaseStatus
+        assertThat(databaseStatus.newColdRvmLeadSaved).isFalse();
+        assertThat(databaseStatus.duplicateColdRvmEntry).isFalse();
+        assertThat(databaseStatus.duplicatePerson).isFalse();
+        assertThat(databaseStatus.duplicateProperty).isTrue();
+        assertThat(databaseStatus.error).isFalse();
+    }
+
+    @Test
+    public void ColdRvmLeadProcessor_PropertyExistsPersonExists_WithProperty() throws Exception {
+        //
+        //Arrange
+        //
+        Address address = new Address();
+        address.setMailingAddress("123 Ave");
+
+        Property propertyFromDatabase = new Property();
+        propertyFromDatabase.setAddress(address);
+
+        Person personFromDatabase2 = new Person();
+        personFromDatabase2.setFirstName("Dan");
+        personFromDatabase2.setLastName("Leo");
+        personFromDatabase2.setAddress(address);
+        personFromDatabase2.addProperty(propertyFromDatabase);
+        Person personFromDatabaseSpy = Mockito.spy(personFromDatabase2);
+
+        LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
+
+        ColdRvmLead coldRvmLeadMock = Mockito.mock(ColdRvmLead.class);
+
+        when(coldRvmLeadMock.getProperty()).thenReturn(propertyFromDatabase);
+
+        LoadRawDataInteractor.ColdRvmLeadProcessor coldRvmLeadProcessor =
+                new LoadRawDataInteractor.ColdRvmLeadProcessor(coldRvmLeadMock, databaseStatus);
+
+        //
+        //Act
+        //
+        ColdRvmLead coldRvmLeadReturned = coldRvmLeadProcessor.apply(personFromDatabaseSpy, propertyFromDatabase);
+
+        //
+        //Assert
+        //
+        //Same objects should be returned
+        assertThat(coldRvmLeadReturned).isEqualTo(coldRvmLeadMock);
+
+        //Add the database property
+        verify(coldRvmLeadMock, Mockito.times(1)).setProperty(propertyFromDatabase);
+
+        //Add the database person
+        verify(coldRvmLeadMock, Mockito.times(1)).setPerson(personFromDatabaseSpy);
+
+        //Add property not called
+        verify(personFromDatabaseSpy, Mockito.times(0)).addProperty(any());
+
+        //No new property added
+        assertThat(personFromDatabaseSpy.getPropertyList().size()).isEqualTo(1);
+
+        //test databaseStatus
+        assertThat(databaseStatus.newColdRvmLeadSaved).isFalse();
+        assertThat(databaseStatus.duplicateColdRvmEntry).isFalse();
+        assertThat(databaseStatus.duplicatePerson).isTrue();
+        assertThat(databaseStatus.duplicateProperty).isTrue();
+    }
+
+    @Test
+    public void ColdRvmLeadProcessor_PropertyExistsPersonExists_WithoutProperty() throws Exception {
         //
         //Arrange
         //
@@ -244,10 +406,12 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
 
         Property propertyFromDatabase = new Property();
         propertyFromDatabase.setAddress(address);
+
         LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
 
         ColdRvmLead coldRvmLeadMock = Mockito.mock(ColdRvmLead.class);
 
+        when(coldRvmLeadMock.getProperty()).thenReturn(propertyFromDatabase);
 
         LoadRawDataInteractor.ColdRvmLeadProcessor coldRvmLeadProcessor =
                 new LoadRawDataInteractor.ColdRvmLeadProcessor(coldRvmLeadMock, databaseStatus);
@@ -255,11 +419,28 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Act
         //
-        //TODO - left off here
+        ColdRvmLead coldRvmLeadReturned = coldRvmLeadProcessor.apply(personFromDatabase, propertyFromDatabase);
 
         //
         //Assert
         //
+        //Same objects should be returned
+        assertThat(coldRvmLeadReturned).isEqualTo(coldRvmLeadMock);
+
+        //Add the database property
+        verify(coldRvmLeadMock, Mockito.times(1)).setProperty(propertyFromDatabase);
+
+        //Add the database person
+        verify(coldRvmLeadMock, Mockito.times(1)).setPerson(personFromDatabase);
+
+        //new property added
+        assertThat(personFromDatabase.getPropertyList().size()).isEqualTo(1);
+
+        //test databaseStatus
+        assertThat(databaseStatus.newColdRvmLeadSaved).isFalse();
+        assertThat(databaseStatus.duplicateColdRvmEntry).isFalse();
+        assertThat(databaseStatus.duplicatePerson).isTrue();
+        assertThat(databaseStatus.duplicateProperty).isTrue();
     }
 
     class RawLeadImpl implements RawLead {

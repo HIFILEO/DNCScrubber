@@ -25,18 +25,43 @@ public class LoadRawLeadsResult extends Result {
     private final String errorMessage;
     private final boolean userCanceled;
     private final boolean fileLoadError;
-
+    private final int numberOfColdLeadDuplicates;
+    private final int numberOfColdLeadsSaved;
+    private final int numberOfColdLeadErrors;
     public LoadRawLeadsResult(int resultType, boolean needsFileName, String errorMessage, boolean userCanceled,
-                              boolean fileLoadError) {
+                              boolean fileLoadError, int numberOfColdLeadDuplicates, int numberOfColdLeadsSaved,
+                              int numberOfColdLeadErrors) {
         this.resultType = resultType;
         this.needsFileName = needsFileName;
         this.errorMessage = errorMessage;
         this.userCanceled = userCanceled;
         this.fileLoadError = fileLoadError;
+        this.numberOfColdLeadsSaved = numberOfColdLeadsSaved;
+        this.numberOfColdLeadErrors = numberOfColdLeadErrors;
+        this.numberOfColdLeadDuplicates = numberOfColdLeadDuplicates;
     }
 
     public static LoadRawLeadsResult inFlight(boolean needsFileName) {
-        return new LoadRawLeadsResult(ResultType.IN_FLIGHT, needsFileName, "", false, false);
+        return new LoadRawLeadsResult(ResultType.IN_FLIGHT, needsFileName, "", false,
+                false, 0 , 0, 0);
+    }
+
+    public static LoadRawLeadsResult success(int numberOfColdLeadDuplicates, int numberOfColdLeadsSaved,
+                                             int numberOfColdLeadErrors) {
+        return new LoadRawLeadsResult(Result.ResultType.SUCCESS, false,
+                "", false, false, numberOfColdLeadDuplicates,
+                numberOfColdLeadsSaved, numberOfColdLeadsSaved);
+    }
+
+    public static LoadRawLeadsResult error(String errorMessage, boolean fileLoadError) {
+        return new LoadRawLeadsResult(Result.ResultType.FAILURE,
+                false,
+                errorMessage,
+                false,
+                fileLoadError,
+                0,
+                0,
+                0);
     }
 
     @Override
@@ -58,5 +83,17 @@ public class LoadRawLeadsResult extends Result {
 
     public boolean isFileLoadError() {
         return fileLoadError;
+    }
+
+    public int getNumberOfColdLeadDuplicates() {
+        return numberOfColdLeadDuplicates;
+    }
+
+    public int getNumberOfColdLeadsSaved() {
+        return numberOfColdLeadsSaved;
+    }
+
+    public int getNumberOfColdLeadErrors() {
+        return numberOfColdLeadErrors;
     }
 }
