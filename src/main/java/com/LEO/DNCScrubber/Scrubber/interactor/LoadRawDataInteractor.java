@@ -55,9 +55,7 @@ public class LoadRawDataInteractor {
         //2  - andThen - change the completable back into Observable
         //3 - start with so things update on the UI.
         //4 - I want a message that tells me how many were saved successfully.
-        return Observable.create(
-                new LoadRawLeadsObservable(this.csvFileController, this.databaseGateway, loadRawLeadsAction,
-                        new StoreRawLeadFlatMap(databaseGateway), new DatabaseStatusCounterScanner()))
+        return Observable.create(getLoadRawLeadsObservable(loadRawLeadsAction))
                 .onErrorReturn(new Function<Throwable, LoadRawLeadsResult>() {
                     @Override
                     public LoadRawLeadsResult apply(Throwable throwable) throws Exception {
@@ -68,7 +66,17 @@ public class LoadRawDataInteractor {
                                 );
             }
         })
-                .startWith(LoadRawLeadsResult.inFlight(true));
+                .startWith(LoadRawLeadsResult.inFlight());
+    }
+
+    @VisibleForTesting
+    protected LoadRawLeadsObservable getLoadRawLeadsObservable(LoadRawLeadsAction loadRawLeadsAction) {
+        return new LoadRawLeadsObservable(
+                this.csvFileController,
+                this.databaseGateway,
+                loadRawLeadsAction,
+                new StoreRawLeadFlatMap(databaseGateway),
+                new DatabaseStatusCounterScanner());
     }
 
     public static class DatabaseStatus {

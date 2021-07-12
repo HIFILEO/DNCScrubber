@@ -21,18 +21,16 @@ import java.io.File;
 
 public class LoadRawLeadsResult extends Result {
     private final @ResultType int resultType;
-    private final boolean needsFileName;
     private final String errorMessage;
     private final boolean userCanceled;
     private final boolean fileLoadError;
     private final int numberOfColdLeadDuplicates;
     private final int numberOfColdLeadsSaved;
     private final int numberOfColdLeadErrors;
-    public LoadRawLeadsResult(int resultType, boolean needsFileName, String errorMessage, boolean userCanceled,
+    public LoadRawLeadsResult(int resultType, String errorMessage, boolean userCanceled,
                               boolean fileLoadError, int numberOfColdLeadDuplicates, int numberOfColdLeadsSaved,
                               int numberOfColdLeadErrors) {
         this.resultType = resultType;
-        this.needsFileName = needsFileName;
         this.errorMessage = errorMessage;
         this.userCanceled = userCanceled;
         this.fileLoadError = fileLoadError;
@@ -41,21 +39,24 @@ public class LoadRawLeadsResult extends Result {
         this.numberOfColdLeadDuplicates = numberOfColdLeadDuplicates;
     }
 
-    public static LoadRawLeadsResult inFlight(boolean needsFileName) {
-        return new LoadRawLeadsResult(ResultType.IN_FLIGHT, needsFileName, "", false,
+    public static LoadRawLeadsResult inFlight() {
+        return new LoadRawLeadsResult(ResultType.IN_FLIGHT, "", false,
                 false, 0 , 0, 0);
     }
 
     public static LoadRawLeadsResult success(int numberOfColdLeadDuplicates, int numberOfColdLeadsSaved,
                                              int numberOfColdLeadErrors) {
-        return new LoadRawLeadsResult(Result.ResultType.SUCCESS, false,
-                "", false, false, numberOfColdLeadDuplicates,
-                numberOfColdLeadsSaved, numberOfColdLeadErrors);
+        return new LoadRawLeadsResult(Result.ResultType.SUCCESS,
+                "",
+                false,
+                false,
+                numberOfColdLeadDuplicates,
+                numberOfColdLeadsSaved,
+                numberOfColdLeadErrors);
     }
 
     public static LoadRawLeadsResult error(String errorMessage, boolean fileLoadError) {
         return new LoadRawLeadsResult(Result.ResultType.FAILURE,
-                false,
                 errorMessage,
                 false,
                 fileLoadError,
@@ -67,10 +68,6 @@ public class LoadRawLeadsResult extends Result {
     @Override
     public int getType() {
         return resultType;
-    }
-
-    public boolean isNeedsFileName() {
-        return needsFileName;
     }
 
     public String getErrorMessage() {
