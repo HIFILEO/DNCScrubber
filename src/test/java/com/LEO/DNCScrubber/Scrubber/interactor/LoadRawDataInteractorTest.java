@@ -582,7 +582,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //Arrange
         //
         TestObserver<LoadRawLeadsResult> testObserver;
-        Throwable throwable = new Throwable("Testing 123");
+        Throwable throwable = new Throwable("Error capturing CSV header");
 
         //Mocks Bitch
         CsvFileController csvFileControllerMock = Mockito.mock(CsvFileController.class);
@@ -626,6 +626,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //Assert
         //
         testObserver.assertValueCount(0);
+        testObserver.assertError(throwable);
 
         //verify scanner was called twice
         verify(storeRawLeadFlatMapMock, Mockito.times(0)).apply(any());

@@ -188,19 +188,15 @@ public class LoadRawDataInteractor {
                     .flatMap(storeRawLeadFlatMap)
                     .scan(new DatabaseStatusCounter(), databaseStatusCounterScanner)
                     .lastElement()
-                    .subscribe(new Consumer<DatabaseStatusCounter>() {
-                        @Override
-                        public void accept(DatabaseStatusCounter databaseStatusCounter) throws Exception {
+                    .subscribe(databaseStatusCounter -> {
+                        emitter.onNext(LoadRawLeadsResult.success(
+                                databaseStatusCounter.numberOfColdLeadDuplicates,
+                                databaseStatusCounter.numberOfColdLeadsAdded,
+                                databaseStatusCounter.numberOfErrors
+                        ));
 
-                            emitter.onNext(LoadRawLeadsResult.success(
-                                    databaseStatusCounter.numberOfColdLeadDuplicates,
-                                    databaseStatusCounter.numberOfColdLeadsAdded,
-                                    databaseStatusCounter.numberOfErrors
-                                    ));
-
-                            emitter.onComplete();
-                        }
-                    });
+                        emitter.onComplete();
+                    }, emitter::onError);
         }
 
         @VisibleForTesting
