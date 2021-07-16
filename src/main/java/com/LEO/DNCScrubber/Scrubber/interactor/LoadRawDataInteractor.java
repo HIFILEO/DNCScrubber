@@ -61,7 +61,7 @@ public class LoadRawDataInteractor {
                     public LoadRawLeadsResult apply(Throwable throwable) throws Exception {
                         logger.error("LoadRawLeads caught an error - return {}", throwable.getMessage());
                         return LoadRawLeadsResult.error(
-                                throwable.getMessage(),
+                                throwable.getMessage() + (throwable.getCause() == null ? "" : throwable.getCause()),
                                 loadRawLeadsAction.getCsvFile() == null
                                 );
             }

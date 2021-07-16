@@ -25,10 +25,14 @@ import java.util.Date;
 
 public class RawLeadCsvImpl implements RawLead {
 
+    public RawLeadCsvImpl() {
+
+    }
+
     @CsvBindByName(column = "Address", required = true)
     private String address;
 
-    @CsvBindByName(column = "Unit #", required = true)
+    @CsvBindByName(column = "Unit #", required = false)
     private String unitNumber;
 
     @CsvBindByName(column = "City", required = true)
@@ -49,31 +53,31 @@ public class RawLeadCsvImpl implements RawLead {
     @CsvBindByName(column = "Owner Occupied", required = true)
     private boolean ownerOccupied;
 
-    @CsvBindByName(column = "Owner 1 First Name", required = true)
+    @CsvBindByName(column = "Owner 1 First Name")
     private String ownerOneFirstName;
 
-    @CsvBindByName(column = "Owner 1 Last Name", required = true)
+    @CsvBindByName(column = "Owner 1 Last Name")
     private String ownerOneLastName;
 
-    @CsvBindByName(column = "Company Name", required = true)
+    @CsvBindByName(column = "Company Name")
     private String companyName;
 
-    @CsvBindByName(column = "Company Address", required = true)
+    @CsvBindByName(column = "Company Address")
     private String companyAddress;
 
-    @CsvBindByName(column = "Owner 2 First Name", required = true)
+    @CsvBindByName(column = "Owner 2 First Name")
     private String ownerTwoFirstName;
 
-    @CsvBindByName(column = "Owner 2 Last Name", required = true)
+    @CsvBindByName(column = "Owner 2 Last Name")
     private String ownerTwoLastName;
 
-    @CsvBindByName(column = "Mailing Care of Name", required = true)
+    @CsvBindByName(column = "Mailing Care of Name")
     private String mailingCareOfName;
 
     @CsvBindByName(column = "Mailing Address", required = true)
     private String mailingAddress;
 
-    @CsvBindByName(column = "Mailing Unit #", required = true)
+    @CsvBindByName(column = "Mailing Unit #")
     private String mailingUnitNumber;
 
     @CsvBindByName(column = "Mailing City", required = true)
@@ -85,10 +89,10 @@ public class RawLeadCsvImpl implements RawLead {
     @CsvBindByName(column = "Mailing Zip", required = true)
     private String mailingZip;
 
-    @CsvBindByName(column = "Mailing County", required = true)
+    @CsvBindByName(column = "Mailing County")
     private String mailingCounty;
 
-    @CsvBindByName(column = "Do Not Mail", required = true)
+    @CsvBindByName(column = "Do Not Mail")
     private String doNotMail;
 
     @CsvBindByName(column = "Property Type", required = true)
@@ -134,24 +138,24 @@ public class RawLeadCsvImpl implements RawLead {
     @CsvBindByName(column = "Est. Equity", required = true)
     private int estEquity;
 
-    @CsvBindByName(column = "MLS Status", required = true)
+    @CsvBindByName(column = "MLS Status")
     private String mLSStatus;
 
-    @CsvBindByName(column = "MLS Date", required = true)
+    @CsvBindByName(column = "MLS Date")
     @CsvDate("yyyy-MM-dd")
     private Date mLSDate;
 
-    @CsvBindByName(column = "MLS Amount", required = true)
+    @CsvBindByName(column = "MLS Amount")
     private int mLSAmount;
 
-    @CsvBindByName(column = "Lien Amount", required = true)
+    @CsvBindByName(column = "Lien Amount")
     private int lienAmount;
 
     @CsvBindByName(column = "Marketing Lists", required = true)
     private int marketingLists;
 
     @CsvBindByName(column = "Date Added to List", required = true)
-    @CsvDate("-MM/dd/yyyy")
+    @CsvDate("MM/dd/yyyy")
     private Date dateAddedToList;
 
     @Override

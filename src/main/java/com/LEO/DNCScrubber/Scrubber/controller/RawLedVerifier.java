@@ -17,38 +17,22 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.opencsv.bean.BeanVerifier;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvConstraintViolationException;
-import com.opencsv.exceptions.CsvException;
-import com.opencsv.exceptions.CsvFieldAssignmentException;
-import io.reactivex.Observable;
 
-import java.io.File;
-import java.io.FileReader;
-import java.util.Iterator;
-import java.util.List;
-
-/**
- * {@link CsvFileController} implementation using Open CSV - http://opencsv.sourceforge.net/
- */
-public class CsvFileControllerImpl implements CsvFileController {
+public class RawLedVerifier implements BeanVerifier {
+    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
 
     @Override
-    public Observable<RawLead> readRawLeads(File file) {
-        return Observable.create(emitter -> {
-            CsvToBeanBuilder cvsToBeanBuilder = new CsvToBeanBuilder(new FileReader(file));
+    public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
+        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
+        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
+                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
+                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
+                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
+            throw new CsvConstraintViolationException(ERROR_MSG);
+        }
 
-            // Verify the data, throw exception if data isn't ready to be processed.
-            cvsToBeanBuilder.withVerifier(new RawLedVerifier());
-
-            CsvToBean csvToBean = cvsToBeanBuilder.withType(RawLeadCsvImpl.class).build();
-
-            for (RawLeadCsvImpl rawLeadCsv : (Iterable<RawLeadCsvImpl>) csvToBean) emitter.onNext(rawLeadCsv);
-
-            emitter.onComplete();
-        });
+        return true;
     }
 }
