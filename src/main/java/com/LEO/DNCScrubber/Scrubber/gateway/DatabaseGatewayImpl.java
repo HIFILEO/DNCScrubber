@@ -148,14 +148,15 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
      * @return - {@link Person}
      */
     private Person convertToPerson(PersonDao personDao) {
-        Address address = new Address();
-        address.setMailingAddress(personDao.getAddress());
-        address.setUnitNumber(personDao.getUnitNumber());
-        address.setCity(personDao.getCity());
-        address.setState(personDao.getState());
-        address.setZip(personDao.getZip());
-        address.setCounty(personDao.getCounty());
-        address.setCountry(personDao.getCountry());
+        Address address = new Address(
+                personDao.getAddress(),
+                personDao.getUnitNumber(),
+                personDao.getCity(),
+                personDao.getState(),
+                personDao.getZip(),
+                personDao.getCounty(),
+                personDao.getCountry()
+        );
 
         Phone phone1 = new Phone();
         phone1.setPhoneNumber(personDao.getPhone1());
@@ -181,10 +182,10 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         phone3.setPhoneLitigation(personDao.isPhone3Litigation());
         phone3.setPhoneTelco(personDao.getPhone3Telco());
 
-        Person person = new Person();
-        person.setFirstName(personDao.getFirstName());
-        person.setLastName(personDao.getLastName());
-        person.setAddress(address);
+        Person person = new Person(
+                personDao.getFirstName(),
+                personDao.getLastName(),
+                address);
         person.setPhone1(phone1);
         person.setPhone2(phone2);
         person.setPhone3(phone3);
@@ -205,18 +206,17 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
      * @return
      */
     private Property convertToProperty(PropertyDao propertyDao) {
-        Address address = new Address();
-        address.setMailingAddress(propertyDao.getAddress());
-        address.setUnitNumber(propertyDao.getUnitNumber());
-        address.setCity(propertyDao.getCity());
-        address.setState(propertyDao.getState());
-        address.setZip(propertyDao.getZip());
-        address.setCounty(propertyDao.getCounty());
-        address.setCountry(propertyDao.getCountry());
+        Address address = new Address(
+                propertyDao.getAddress(),
+                propertyDao.getUnitNumber(),
+                propertyDao.getCity(),
+                propertyDao.getState(),
+                propertyDao.getZip(),
+                propertyDao.getCounty(),
+                propertyDao.getCountry()
+        );
 
-        Property property = new Property();
-        property.setAddress(address);
-        property.setaPN(propertyDao.getaPN());
+        Property property = new Property(propertyDao.getaPN(), address);
         property.setOwnerOccupied(propertyDao.isOwnerOccupied());
         property.setCompanyName(propertyDao.getCompanyName());
         property.setCompanyAddress(propertyDao.getCompanyAddress());

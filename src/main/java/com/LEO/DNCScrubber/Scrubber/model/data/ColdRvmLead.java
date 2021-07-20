@@ -108,14 +108,14 @@ public class ColdRvmLead {
     public String getNaturalId() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        if (property != null) {
-            stringBuilder.append(person.getNaturalId());
-        }
+        //Person
+        stringBuilder.append(person.getFirstName().replaceAll("\\s+",""));
+        stringBuilder.append("~");
+        stringBuilder.append(person.getLastName().replaceAll("\\s+",""));
+        stringBuilder.append("~");
 
-        if (property != null) {
-            stringBuilder.append("~");
-            stringBuilder.append(property.getNaturalId());
-        }
+        //Property
+        stringBuilder.append(property.getNaturalId());
 
         return stringBuilder.toString();
     }

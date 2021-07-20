@@ -23,8 +23,8 @@ import java.util.Date;
  * Represents a business layer property class.
  */
 public class Property {
-    private Address address;
-    private String aPN = "";
+    private final Address address;
+    private final String aPN;
     private boolean ownerOccupied;
     private String companyName = "";
     private String companyAddress = "";
@@ -47,20 +47,17 @@ public class Property {
     private String lienAmount = "";
     private Date dateAddedToList = new Date();
 
+    public Property(String aPN, Address address) {
+        this.aPN = aPN;
+        this.address = address;
+    }
+
     public Address getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
-        this.address = address;
-    }
-
     public String getaPN() {
         return aPN;
-    }
-
-    public void setaPN(String aPN) {
-        this.aPN = aPN;
     }
 
     public boolean isOwnerOccupied() {
@@ -232,12 +229,15 @@ public class Property {
     }
 
     public String getNaturalId() {
-        if (address == null || address.getMailingAddress().isEmpty()) {
+        if (aPN == null || address == null || address.getCounty() == null) {
             return "";
         }
 
-        String noSpacesAddress = address.getMailingAddress().replaceAll("\\s+","");
-        String noSpacesCity = address.getCity().replaceAll("\\s+","");
-        return noSpacesAddress + "~" + noSpacesCity;
+        /*
+        Note - APN is unique but only for county so - county + APN.
+         */
+        String noSpacesCounty = address.getCounty().replaceAll("\\s+","");
+        String noSpacesAPN = aPN.replaceAll("\\s+","");
+        return noSpacesCounty + "~" + noSpacesAPN;
     }
 }

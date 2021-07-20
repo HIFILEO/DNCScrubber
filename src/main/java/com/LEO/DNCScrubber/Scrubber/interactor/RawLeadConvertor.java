@@ -29,17 +29,19 @@ public class RawLeadConvertor {
         //
         // Create Property
         //
-        Address address = new Address();
-        address.setMailingAddress(rawLead.getMailingAddress());
-        address.setUnitNumber(rawLead.getUnitNumber());
-        address.setCity(rawLead.getCity());
-        address.setZip(rawLead.getZip());
-        address.setCounty(rawLead.getCounty());
-        address.setCountry("US");
+        Address address = new Address(
+                rawLead.getMailingAddress(),
+                rawLead.getUnitNumber(),
+                rawLead.getCity(),
+                rawLead.getState(),
+                rawLead.getZip(),
+                rawLead.getCounty(),
+                "US"
+        );
 
-        Property property = new Property();
-        property.setAddress(address);
-        property.setaPN(rawLead.getAPN());
+        Property property = new Property(
+                rawLead.getAPN(),
+                address);
         property.setOwnerOccupied(rawLead.isOwnerOccupied());
         property.setCompanyName(rawLead.getCompanyName());
         property.setCompanyAddress(rawLead.getCompanyAddress());
@@ -67,10 +69,10 @@ public class RawLeadConvertor {
         //
 
         //Note - reminder no phone number or email here
-        Person person = new Person();
-        person.setFirstName(rawLead.getOwnerOneFirstName());
-        person.setLastName(rawLead.getOwnerOneLastName());
-        person.setAddress(address);
+        Person person = new Person(
+                rawLead.getOwnerOneFirstName(),
+                rawLead.getOwnerOneLastName(), address
+        );
         person.addProperty(property);
 
         //

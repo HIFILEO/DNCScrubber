@@ -17,6 +17,8 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +30,9 @@ import java.util.List;
  *      DB 1 to many
  */
 public class Person {
-    private String firstName = "";
-    private String lastName = "";
-    private Address address;
+    private final String firstName;
+    private final String lastName;
+    private final Address address;
     private Phone phone1;
     private Phone phone2;
     private Phone phone3;
@@ -39,28 +41,22 @@ public class Person {
     private String email3 = "";
     private List<Property> propertyList = new ArrayList<Property>();
 
-    public String getFirstName() {
-        return firstName;
+    public Person(@NotNull String firstName, @NotNull String lastName, @NotNull  Address address) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public String getFirstName() {
+        return firstName;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
     public Address getAddress() {
         return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
     }
 
     public Phone getPhone1() {
@@ -124,10 +120,6 @@ public class Person {
     }
 
     public String getNaturalId() {
-        if (firstName.isEmpty() && lastName.isEmpty() && (address == null || address.getMailingAddress().isEmpty())) {
-            return "";
-        }
-
         String noSpacesFirstName = firstName.replaceAll("\\s+","");
         String noSpacesLastName = lastName.replaceAll("\\s+","");
         String noSpacesAddress = address.getMailingAddress().replaceAll("\\s+","");

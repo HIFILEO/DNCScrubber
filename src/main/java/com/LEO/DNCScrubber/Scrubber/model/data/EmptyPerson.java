@@ -16,54 +16,27 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 /**
- * Represents an Address
+ * This represents an Empty {@link Person}
  */
-public class Address {
-    private final String mailingAddress;
-    private final String unitNumber;
-    private final String city;
-    private final String state;
-    private final String zip;
-    private final String county;
-    private final String country;
+public class EmptyPerson extends Person {
 
-    public Address(String mailingAddress, String unitNumber, String city, String state, String zip, String county,
-                   String country) {
-        this.mailingAddress = mailingAddress;
-        this.unitNumber = unitNumber;
-        this.city = city;
-        this.state = state;
-        this.zip = zip;
-        this.county = county;
-        this.country = country;
+    public EmptyPerson(String firstName, String lastName, Address address) {
+        super(firstName, lastName, address);
     }
 
-    public String getMailingAddress() {
-        return mailingAddress;
-    }
+    public static EmptyPerson createEmptyPerson() {
+        Address address = new Address(
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE"
+        );
 
-    public String getUnitNumber() {
-        return unitNumber;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public String getZip() {
-        return zip;
-    }
-
-    public String getCounty() {
-        return county;
-    }
-
-    public String getCountry() {
-        return country;
+        return new EmptyPerson("", "", address);
     }
 }

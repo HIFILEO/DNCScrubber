@@ -16,54 +16,28 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 /**
- * Represents an Address
+ * This class represents an Empty {@link Property}.
  */
-public class Address {
-    private final String mailingAddress;
-    private final String unitNumber;
-    private final String city;
-    private final String state;
-    private final String zip;
-    private final String county;
-    private final String country;
+public class EmptyProperty extends Property {
 
-    public Address(String mailingAddress, String unitNumber, String city, String state, String zip, String county,
-                   String country) {
-        this.mailingAddress = mailingAddress;
-        this.unitNumber = unitNumber;
-        this.city = city;
-        this.state = state;
-        this.zip = zip;
-        this.county = county;
-        this.country = country;
+    public EmptyProperty(String aPN, Address address) {
+        super(aPN, address);
     }
 
-    public String getMailingAddress() {
-        return mailingAddress;
+    public static EmptyProperty createEmptyProperty() {
+        Address address = new Address(
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE"
+        );
+
+        return new EmptyProperty("", address);
     }
 
-    public String getUnitNumber() {
-        return unitNumber;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public String getZip() {
-        return zip;
-    }
-
-    public String getCounty() {
-        return county;
-    }
-
-    public String getCountry() {
-        return country;
-    }
 }

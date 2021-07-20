@@ -121,7 +121,7 @@ public class LoadRawDataInteractor {
             //Address Property
             //If the property exists in the database, do nothing. Reuse it.
             //
-            if (!propertyFromDatabase.getNaturalId().isEmpty()) {
+            if (!(propertyFromDatabase instanceof EmptyProperty)) {
                 logger.info("Property {} exists. Reuse for cold lead", propertyFromDatabase.getNaturalId());
                 databaseStatus.duplicateProperty = true;
                 coldRvmLeadToProcess.setProperty(propertyFromDatabase);
@@ -131,7 +131,7 @@ public class LoadRawDataInteractor {
             //Address Person
             //If the person exists in the database, check for property link.
             //
-            if (!personFromDatabase.getNaturalId().isEmpty()) {
+            if (!(personFromDatabase instanceof EmptyPerson)) {
                 logger.info("Person {} exists. Reuse for cold lead", personFromDatabase.getNaturalId());
                 databaseStatus.duplicatePerson = true;
                 //check property and see if they own it, if not add it.
@@ -239,6 +239,11 @@ public class LoadRawDataInteractor {
             ColdRvmLead coldRvmLeadToProcess = rawLeadConvertor.convertRawLeadToColdRvmLead(rawLead);
             DatabaseStatus databaseStatus = new DatabaseStatus();
 
+            /*
+            Note - looking back at this, I can see this isn't a functional reactive program as the objects
+            are mutable. That's ok, shit happens. I didn't notice this until I was refactoring the business
+            logic around creating keys and not wanting null / corrupted natural keys.
+             */
             return databaseGateway.loadColdRvmLeadByNaturalId(coldRvmLeadToProcess.getNaturalId())
                     .flatMap(new Function<ColdRvmLead, ObservableSource<DatabaseStatus>>() {
                         @Override
@@ -254,9 +259,9 @@ public class LoadRawDataInteractor {
                             //No ColdRvmLead, use coldRvmLeadToProcess. Fetch person and property from DB process
                             Observable.zip(
                                     databaseGateway.loadPersonByNaturalId(coldRvmLeadToProcess.getPerson().getNaturalId())
-                                            .switchIfEmpty(Observable.just(new Person())),
+                                            .switchIfEmpty(Observable.just(EmptyPerson.createEmptyPerson())),
                                     databaseGateway.loadPropertyByNaturalId(coldRvmLeadToProcess.getProperty().getNaturalId())
-                                            .switchIfEmpty(Observable.just(new Property())),
+                                            .switchIfEmpty(Observable.just(EmptyProperty.createEmptyProperty())),
                                     new ColdRvmLeadProcessor(coldRvmLeadToProcess, databaseStatus)
                             ).flatMap(new Function<ColdRvmLead, ObservableSource<Boolean>>() {
                                 @Override

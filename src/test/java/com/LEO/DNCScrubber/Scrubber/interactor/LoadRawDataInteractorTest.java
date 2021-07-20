@@ -268,8 +268,8 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Arrange
         //
-        Person personFromDatabase = new Person();
-        Property propertyFromDatabase = new Property();
+        EmptyPerson emptyPerson = EmptyPerson.createEmptyPerson();
+        EmptyProperty emptyProperty = EmptyProperty.createEmptyProperty();
 
         LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
 
@@ -281,7 +281,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Act
         //
-        ColdRvmLead coldRvmLeadReturned = coldRvmLeadProcessor.apply(personFromDatabase, propertyFromDatabase);
+        ColdRvmLead coldRvmLeadReturned = coldRvmLeadProcessor.apply(emptyPerson, emptyProperty);
 
         //
         //Assert
@@ -302,13 +302,21 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Arrange
         //
-        Address address = new Address();
-        address.setMailingAddress("123 Ave");
+        Person personFromDatabase = EmptyPerson.createEmptyPerson();
 
-        Person personFromDatabase = new Person();
+        Address propertyAddress = new Address(
+                "123 Ave property",
+                "",
+                "Boston",
+                "MA",
+                "00215",
+                "Boston",
+                "US");
 
-        Property propertyFromDatabase = new Property();
-        propertyFromDatabase.setAddress(address);
+        Property propertyFromDatabase = new Property(
+                "APN#12345",
+                propertyAddress
+        );
         LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
 
         ColdRvmLead coldRvmLeadMock = Mockito.mock(ColdRvmLead.class);
@@ -346,16 +354,34 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Arrange
         //
-        Address address = new Address();
-        address.setMailingAddress("123 Ave");
+        Address propertyAddress = new Address(
+                "123 Ave property",
+                "",
+                "Boston",
+                "MA",
+                "00215",
+                "Boston",
+                "US");
 
-        Property propertyFromDatabase = new Property();
-        propertyFromDatabase.setAddress(address);
+        Property propertyFromDatabase = new Property(
+                "APN#1234",
+                propertyAddress
+        );
 
-        Person personFromDatabase2 = new Person();
-        personFromDatabase2.setFirstName("Dan");
-        personFromDatabase2.setLastName("Leo");
-        personFromDatabase2.setAddress(address);
+        Address personAddress = new Address(
+                "123 Ave person",
+                "",
+                "Boston",
+                "MA",
+                "00215",
+                "Boston",
+                "US");
+
+        Person personFromDatabase2 = new Person(
+                "Dan",
+                "Leo",
+                personAddress
+        );
         personFromDatabase2.addProperty(propertyFromDatabase);
         Person personFromDatabaseSpy = Mockito.spy(personFromDatabase2);
 
@@ -403,16 +429,34 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Arrange
         //
-        Address address = new Address();
-        address.setMailingAddress("123 Ave");
+        Address personAddress = new Address(
+                "123 Ave person",
+                "",
+                "Boston",
+                "MA",
+                "00215",
+                "Boston",
+                "US");
 
-        Person personFromDatabase = new Person();
-        personFromDatabase.setFirstName("Dan");
-        personFromDatabase.setLastName("Leo");
-        personFromDatabase.setAddress(address);
+        Person personFromDatabase = new Person(
+                "Dan",
+                "Leo",
+                personAddress
+        );
 
-        Property propertyFromDatabase = new Property();
-        propertyFromDatabase.setAddress(address);
+        Address propertyAddress = new Address(
+                "123 Ave property",
+                "",
+                "Boston",
+                "MA",
+                "00215",
+                "Boston",
+                "US");
+
+        Property propertyFromDatabase = new Property(
+                "APN#12345",
+                propertyAddress
+        );
 
         LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
 
