@@ -28,9 +28,11 @@ import java.io.File;
 public interface CsvFileController {
 
     /**
-     * Reads the given CSV file and returns each line as it's own {@link RawLead} object
+     * Reads the given CSV file and returns each line as it's own {@link RawLead} object.
+     *
      * @param file - a CSV file that conforms to the {@link RawLead}
-     * @return {@link RawLead} until EOF is reached, then On Complete is called. Will throw OnError.
+     * @return {@link RawLead} (including ones with errors) until EOF is reached, then On Complete is called.
+     * Will throw OnError where appropriate.
      */
     Observable<RawLead> readRawLeads(File file);
 }

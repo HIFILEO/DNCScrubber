@@ -17,9 +17,12 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.LEO.DNCScrubber.Scrubber.interactor.RawLeadConvertor;
+import com.LEO.DNCScrubber.Scrubber.model.data.ColdRvmLead;
 import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.LEO.DNCScrubber.rx.RxJavaTest;
 import com.LEO.DNCScrubber.util.Visitors;
+import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,30 +68,30 @@ public class CsvFileControllerImplTest extends RxJavaTest {
         testObserver.assertNoErrors();
     }
 
-    @Test
-    public void readRawLeads_error_failBeanVerifier() throws Exception {
-        //
-        //Arrange
-        //
-        CsvFileControllerImpl csvFileControllerImpl = new CsvFileControllerImpl();
-        TestObserver<RawLead> testObserver;
-
-        File file = new File("build/resources/test/unittest-data-failBeanVerify.csv");
-
-        //
-        //Act
-        //
-        testObserver = csvFileControllerImpl.readRawLeads(file).test();
-        testScheduler.triggerActions();
-
-        //
-        //Assert
-        //
-        List<Throwable> errors = testObserver.errors();
-        assertThat(errors).isNotEmpty();
-        assertThat(errors.get(0).getMessage()).isEqualToIgnoringCase(
-                "com.opencsv.exceptions.CsvConstraintViolationException: " + RawLedVerifier.ERROR_MSG);
-    }
+//    @Test
+//    public void readRawLeads_error_failBeanVerifier() throws Exception {
+//        //
+//        //Arrange
+//        //
+//        CsvFileControllerImpl csvFileControllerImpl = new CsvFileControllerImpl();
+//        TestObserver<RawLead> testObserver;
+//
+//        File file = new File("build/resources/test/unittest-data-failBeanVerify.csv");
+//
+//        //
+//        //Act
+//        //
+//        testObserver = csvFileControllerImpl.readRawLeads(file).test();
+//        testScheduler.triggerActions();
+//
+//        //
+//        //Assert
+//        //
+//        List<Throwable> errors = testObserver.errors();
+//        assertThat(errors).isNotEmpty();
+//        assertThat(errors.get(0).getMessage()).isEqualToIgnoringCase(
+//                "com.opencsv.exceptions.CsvConstraintViolationException: " + RawLedVerifier.ERROR_MSG);
+//    }
 
     @Test
     public void testOpenCsv_success() throws Exception {
@@ -133,7 +136,6 @@ public class CsvFileControllerImplTest extends RxJavaTest {
 
     }
 
-
     @Test
     public void readRawLeads_fileNotFound() {
         //
@@ -157,4 +159,43 @@ public class CsvFileControllerImplTest extends RxJavaTest {
         testObserver.assertErrorMessage("no-file.csv (No such file or directory)");
     }
 
+    @Test
+    public void readRawLeads_firstGood_restFail() throws Exception {
+        //
+        //Arrange
+        //
+        CsvFileControllerImpl csvFileControllerImpl = new CsvFileControllerImpl();
+        TestObserver<RawLead> testObserver;
+
+        File file = new File("build/resources/test/test-data - Bad Data.csv");
+
+        //
+        //Act
+        //
+        testObserver = csvFileControllerImpl.readRawLeads(file).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        testObserver.assertValueCount(10);//9 fields - 10 count because duplicate errors on one screen
+
+        //5 good 5 bad
+        int numRawLeadCsvImpl = 0;
+        int numRawLeadErrorImpl = 0;
+
+        for (Iterator<Object> it = testObserver.getEvents().get(0).iterator(); it.hasNext(); ) {
+            RawLead rawLead = (RawLead) it.next();
+            if (rawLead instanceof RawLeadErrorImpl) {
+                numRawLeadErrorImpl++;
+            } else if (rawLead instanceof RawLeadCsvImpl) {
+                numRawLeadCsvImpl++;
+            }
+        }
+
+        assertThat(numRawLeadCsvImpl).isEqualTo(5);
+        assertThat(numRawLeadErrorImpl).isEqualTo(5);
+    }
 }

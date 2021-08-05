@@ -42,11 +42,28 @@ public class CsvFileControllerImpl implements CsvFileController {
             CsvToBeanBuilder cvsToBeanBuilder = new CsvToBeanBuilder(new FileReader(file));
 
             // Verify the data, throw exception if data isn't ready to be processed.
-            cvsToBeanBuilder.withVerifier(new RawLedVerifier());
+            //cvsToBeanBuilder.withVerifier(new RawLedVerifier());
+
+            //suppress errors on iterator so you can log them
+            //https://stackoverflow.com/questions/58807420/how-to-create-a-list-of-valid-csv-records-by-logging-the-error-of-invalid-record
+            cvsToBeanBuilder.withThrowExceptions(false);
 
             CsvToBean csvToBean = cvsToBeanBuilder.withType(RawLeadCsvImpl.class).build();
-
             for (RawLeadCsvImpl rawLeadCsv : (Iterable<RawLeadCsvImpl>) csvToBean) emitter.onNext(rawLeadCsv);
+
+            //Report Malformed Data errors as RawLeads w/ errors
+            //Note - well architected streams don't call onError for valid response. Send specific types & "break the stream".
+            //Note - you can get multiple exceptions on one line. Send them down, it's the message that clarifies problems.
+            for (CsvException csvException : (Iterable<CsvException>) csvToBean.getCapturedExceptions()) {
+
+                StringBuilder errorStringBuilder = new StringBuilder();
+                errorStringBuilder.append(csvException.getLineNumber());
+                errorStringBuilder.append(" - ");
+                errorStringBuilder.append(csvException.getMessage());
+
+                RawLeadErrorImpl rawLeadError = new RawLeadErrorImpl(errorStringBuilder.toString());
+                emitter.onNext(rawLeadError);
+            }
 
             emitter.onComplete();
         });

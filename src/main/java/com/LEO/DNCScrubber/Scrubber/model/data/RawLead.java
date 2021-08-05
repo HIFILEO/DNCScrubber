@@ -22,6 +22,8 @@ import java.util.Date;
  * Business layer representation of a raw lead.
  */
 public interface RawLead {
+    boolean hasError();
+    String getErrorMessage();
     String getAddress();
     String getUnitNumber();
     String getCity();

@@ -13,13 +13,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 /*
@@ -77,6 +74,11 @@ class RawLeadConvertorTest extends RxJavaTest {
         //
         assertThat(rawLeadCsvList.size()).isEqualTo(9);
 
+        verifyFirstEntry(coldRvmLead);
+
+    }
+
+    private void verifyFirstEntry(ColdRvmLead coldRvmLead) {
         //ColdRvmLead
         assertThat(coldRvmLead.getDateWorkflowStarted()).isNotNull();
         assertThat(this.convertDateToString(coldRvmLead.getDateWorkflowStarted(), "MM/dd/yyyy"))
@@ -255,6 +257,4 @@ class RawLeadConvertorTest extends RxJavaTest {
                 "~" +
                 address);
     }
-
-
 }

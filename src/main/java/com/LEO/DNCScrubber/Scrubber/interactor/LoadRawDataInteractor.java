@@ -18,6 +18,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
+import com.LEO.DNCScrubber.Scrubber.controller.RawLeadErrorImpl;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
 import com.LEO.DNCScrubber.Scrubber.model.data.*;
@@ -25,7 +26,6 @@ import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
 import com.google.common.annotations.VisibleForTesting;
 import io.reactivex.*;
 import io.reactivex.functions.BiFunction;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
 import org.slf4j.Logger;
@@ -76,22 +76,40 @@ public class LoadRawDataInteractor {
                 this.databaseGateway,
                 loadRawLeadsAction,
                 new StoreRawLeadFlatMap(databaseGateway),
-                new DatabaseStatusCounterScanner());
+                new ProcessRawLeadErrorFlatMap(),
+                new StatusCounterScanner());
     }
 
-    public static class DatabaseStatus {
-        boolean newColdRvmLeadSaved;
-        boolean duplicateColdRvmEntry;
-        boolean duplicatePerson;
-        boolean duplicateProperty;
+    /**
+     * Generic Status message for processing {@link RawLead}
+     */
+    public abstract static class Status  {
         boolean error;
         String errorMessage;
     }
 
-    public static class DatabaseStatusCounter {
+    /**
+     * Specific status to process a {@link RawLead} with the database.
+     */
+    public static class DatabaseStatus extends Status {
+        boolean newColdRvmLeadSaved;
+        boolean duplicateColdRvmEntry;
+        boolean duplicatePerson;
+        boolean duplicateProperty;
+    }
+
+    /**
+     * Specific status to process a {@link RawLead} with the CSV Reader
+     */
+    public static class CsvStatus extends Status {
+
+    }
+
+    public static class StatusCounter {
         int numberOfColdLeadsAdded=  0;
         int numberOfColdLeadDuplicates = 0;
         int numberOfErrors = 0;
+        String errorMessage = "";
     }
 
     /**
@@ -163,8 +181,9 @@ public class LoadRawDataInteractor {
         private final CsvFileController csvFileController;
         private final DatabaseGateway databaseGateway;
         private final LoadRawLeadsAction loadRawLeadsAction;
+        private ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMap;
         private StoreRawLeadFlatMap storeRawLeadFlatMap;
-        private DatabaseStatusCounterScanner databaseStatusCounterScanner;
+        private StatusCounterScanner statusCounterScanner;
 
         /**
          * Constructor
@@ -174,25 +193,42 @@ public class LoadRawDataInteractor {
          */
         public LoadRawLeadsObservable(CsvFileController csvFileController, DatabaseGateway databaseGateway,
                                       LoadRawLeadsAction loadRawLeadsAction, StoreRawLeadFlatMap storeRawLeadFlatMap,
-                                      DatabaseStatusCounterScanner databaseStatusCounterScanner) {
+                                      ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMap,
+                                      StatusCounterScanner statusCounterScanner) {
             this.csvFileController = csvFileController;
             this.databaseGateway = databaseGateway;
             this.loadRawLeadsAction = loadRawLeadsAction;
             this.storeRawLeadFlatMap = storeRawLeadFlatMap;
-            this.databaseStatusCounterScanner = databaseStatusCounterScanner;
+            this.processRawLeadErrorFlatMap = processRawLeadErrorFlatMap;
+            this.statusCounterScanner = statusCounterScanner;
         }
 
         @Override
         public void subscribe(ObservableEmitter<LoadRawLeadsResult> emitter) throws Exception {
+            /*
+            Note - How this works:
+            - Read as many entries as possible from a well formatted CSV file. Return RawLeads w/o errors.
+            - Return all exceptions for missing data fields as RawLeads w/ errors
+            - split the stream into the best flatmap based on error or not
+            - Scan all the results so you have one Status Counter and report last element once the stream completes
+            - Any MAJOR errors need to propagate through the stream.
+             */
             csvFileController.readRawLeads(loadRawLeadsAction.getCsvFile())
-                    .flatMap(storeRawLeadFlatMap)
-                    .scan(new DatabaseStatusCounter(), databaseStatusCounterScanner)
+                    .flatMap(rawLead -> {
+                        if (rawLead.hasError()) {
+                            return processRawLeadErrorFlatMap.apply(rawLead);
+                        } else {
+                            return storeRawLeadFlatMap.apply(rawLead);
+                        }
+                    })
+                    .scan(new StatusCounter(), statusCounterScanner)
                     .lastElement()
-                    .subscribe(databaseStatusCounter -> {
+                    .subscribe(statusCounter -> {
                         emitter.onNext(LoadRawLeadsResult.success(
-                                databaseStatusCounter.numberOfColdLeadDuplicates,
-                                databaseStatusCounter.numberOfColdLeadsAdded,
-                                databaseStatusCounter.numberOfErrors
+                                statusCounter.numberOfColdLeadDuplicates,
+                                statusCounter.numberOfColdLeadsAdded,
+                                statusCounter.numberOfErrors,
+                                statusCounter.errorMessage
                         ));
 
                         emitter.onComplete();
@@ -205,8 +241,29 @@ public class LoadRawDataInteractor {
         }
 
         @VisibleForTesting
-        protected void setDatabaseStatusCounterScanner(DatabaseStatusCounterScanner databaseStatusCounterScanner) {
-            this.databaseStatusCounterScanner = databaseStatusCounterScanner;
+        protected void setDatabaseStatusCounterScanner(StatusCounterScanner statusCounterScanner) {
+            this.statusCounterScanner = statusCounterScanner;
+        }
+    }
+
+    /**
+     * Takes a {@link RawLeadErrorImpl} and converts it to a {@link CsvStatus}
+     */
+    protected static class ProcessRawLeadErrorFlatMap implements Function<RawLead, ObservableSource<CsvStatus>> {
+
+        @Override
+        public ObservableSource<CsvStatus> apply(RawLead rawLead) throws Exception {
+
+            if (rawLead.hasError()) {
+                CsvStatus csvStatus = new CsvStatus();
+                csvStatus.error = true;
+                csvStatus.errorMessage = rawLead.getErrorMessage();
+                return Observable.just(csvStatus);
+            }
+            else {
+                logger.warn("RawLead is not an error, return empty.");
+                return Observable.empty();
+            }
         }
     }
 
@@ -287,22 +344,32 @@ public class LoadRawDataInteractor {
     }
 
     /**
-     * Scans the incoming {@link DatabaseStatus} and update the seeded {@link DatabaseStatusCounter}.
+     * Scans the incoming {@link Status} and update the seeded {@link StatusCounter}.
      */
-    protected static class DatabaseStatusCounterScanner implements
-            BiFunction<DatabaseStatusCounter, DatabaseStatus, DatabaseStatusCounter> {
+    protected static class StatusCounterScanner implements
+            BiFunction<StatusCounter, Status, StatusCounter> {
 
         @Override
-        public DatabaseStatusCounter apply(DatabaseStatusCounter databaseStatusCounter, DatabaseStatus databaseStatus) {
-            if (databaseStatus.duplicateColdRvmEntry) {
-                databaseStatusCounter.numberOfColdLeadDuplicates++;
-            } else if (databaseStatus.newColdRvmLeadSaved) {
-                databaseStatusCounter.numberOfColdLeadsAdded++;
-            } else if (databaseStatus.error) {
-                databaseStatusCounter.numberOfErrors++;
+        public StatusCounter apply(StatusCounter statusCounter, Status status) {
+
+            if (status.error) {
+                statusCounter.numberOfErrors++;
+
+                statusCounter.errorMessage = statusCounter.errorMessage + "\n"
+                        + status.errorMessage;
             }
 
-            return databaseStatusCounter;
+            if (status instanceof DatabaseStatus) {
+                DatabaseStatus databaseStatus = (DatabaseStatus) status;
+
+                if (databaseStatus.duplicateColdRvmEntry) {
+                    statusCounter.numberOfColdLeadDuplicates++;
+                } else if (databaseStatus.newColdRvmLeadSaved) {
+                    statusCounter.numberOfColdLeadsAdded++;
+                }
+            }
+
+            return statusCounter;
         }
     }
 

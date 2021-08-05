@@ -19,6 +19,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
+import com.LEO.DNCScrubber.Scrubber.controller.RawLeadCsvImpl;
+import com.LEO.DNCScrubber.Scrubber.controller.RawLeadErrorImpl;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
 import com.LEO.DNCScrubber.Scrubber.model.data.*;
@@ -26,9 +28,7 @@ import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
 import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import com.LEO.DNCScrubber.rx.RxJavaTest;
 import com.google.common.annotations.VisibleForTesting;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.Single;
+import io.reactivex.*;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,15 +53,15 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
     }
 
     @Test
-    public void DatabaseStatusCounterScanner_addDuplicate() throws Exception {
+    public void StatusCounterScanner_addDuplicate() throws Exception {
         //
         //Arrange
         //
-        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScanner =
-                new LoadRawDataInteractor.DatabaseStatusCounterScanner();
+        LoadRawDataInteractor.StatusCounterScanner databaseStatusCounterScanner =
+                new LoadRawDataInteractor.StatusCounterScanner();
 
-        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter =
-                new LoadRawDataInteractor.DatabaseStatusCounter();
+        LoadRawDataInteractor.StatusCounter databaseStatusCounter =
+                new LoadRawDataInteractor.StatusCounter();
         databaseStatusCounter.numberOfColdLeadDuplicates = 10;
         databaseStatusCounter.numberOfColdLeadsAdded = 9;
 
@@ -71,7 +71,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Act
         //
-        LoadRawDataInteractor.DatabaseStatusCounter counterToTest =
+        LoadRawDataInteractor.StatusCounter counterToTest =
                 databaseStatusCounterScanner.apply(databaseStatusCounter, databaseStatus);
 
         //
@@ -82,15 +82,15 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
     }
 
     @Test
-    public void DatabaseStatusCounterScanner_addNew() throws Exception {
+    public void StatusCounterScanner_addNew() throws Exception {
         //
         //Arrange
         //
-        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScanner =
-                new LoadRawDataInteractor.DatabaseStatusCounterScanner();
+        LoadRawDataInteractor.StatusCounterScanner databaseStatusCounterScanner =
+                new LoadRawDataInteractor.StatusCounterScanner();
 
-        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter =
-                new LoadRawDataInteractor.DatabaseStatusCounter();
+        LoadRawDataInteractor.StatusCounter databaseStatusCounter =
+                new LoadRawDataInteractor.StatusCounter();
         databaseStatusCounter.numberOfColdLeadDuplicates = 10;
         databaseStatusCounter.numberOfColdLeadsAdded = 9;
 
@@ -101,7 +101,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         //Act
         //
-        LoadRawDataInteractor.DatabaseStatusCounter counterToTest =
+        LoadRawDataInteractor.StatusCounter counterToTest =
                 databaseStatusCounterScanner.apply(databaseStatusCounter, databaseStatus);
 
         //
@@ -118,7 +118,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         TestObserver<LoadRawDataInteractor.DatabaseStatus> testObserver;
 
-        RawLead rawLead = new RawLeadImpl();
+        RawLead rawLead = new RawLeadImplTest();
         RawLeadConvertor rawLeadConvertor = new RawLeadConvertor();
         ColdRvmLead coldRvmLeadToProcess = rawLeadConvertor.convertRawLeadToColdRvmLead(rawLead);
 
@@ -164,7 +164,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //
         TestObserver<LoadRawDataInteractor.DatabaseStatus> testObserver;
 
-        RawLead rawLead = new RawLeadImpl();
+        RawLead rawLead = new RawLeadImplTest();
         RawLeadConvertor rawLeadConvertor = new RawLeadConvertor();
         ColdRvmLead coldRvmLeadToProcess = rawLeadConvertor.convertRawLeadToColdRvmLead(rawLead);
 
@@ -217,7 +217,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
 
         final String testing123 = "testing 123";
 
-        RawLead rawLead = new RawLeadImpl();
+        RawLead rawLead = new RawLeadImplTest();
         RawLeadConvertor rawLeadConvertor = new RawLeadConvertor();
         ColdRvmLead coldRvmLeadToProcess = rawLeadConvertor.convertRawLeadToColdRvmLead(rawLead);
 
@@ -261,6 +261,68 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         assertThat(databaseStatus.newColdRvmLeadSaved).isFalse();
         assertThat(databaseStatus.error).isTrue();
         assertThat(databaseStatus.errorMessage).isEqualTo(testing123);
+    }
+
+    @Test
+    public void ProcessRawLeadErrorFlatMap_validStatus() throws Exception {
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawDataInteractor.CsvStatus> testObserver;
+        final String ERROR_MSG = "This is just a test";
+
+        RawLead rawLead = new RawLeadErrorImpl(ERROR_MSG);
+
+        LoadRawDataInteractor.ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMap =
+                new LoadRawDataInteractor.ProcessRawLeadErrorFlatMap();
+
+        //
+        //Act
+        //
+        //Note - you need to convert an ObservableSource to a single in order to test
+        testObserver = Single.fromObservable(processRawLeadErrorFlatMap.apply(rawLead)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertNoErrors();
+        testObserver.assertValueCount(1);
+
+        LoadRawDataInteractor.CsvStatus csvStatus = (LoadRawDataInteractor.CsvStatus)
+                testObserver.getEvents().get(0).get(0);
+
+        assertThat(csvStatus).isNotNull();
+        assertThat(csvStatus.error).isTrue();
+        assertThat(csvStatus.errorMessage).isEqualToIgnoringCase(ERROR_MSG);
+    }
+
+    @Test
+    public void ProcessRawLeadErrorFlatMap_emptyResponse() throws Exception {
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawDataInteractor.CsvStatus> testObserver;
+
+        RawLead rawLead = new RawLeadImplTest();
+
+        LoadRawDataInteractor.ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMap =
+                new LoadRawDataInteractor.ProcessRawLeadErrorFlatMap();
+
+        //
+        //Act
+        //
+        //Note - you need to convert an ObservableSource to an Observable
+        testObserver = Observable.wrap(processRawLeadErrorFlatMap.apply(rawLead)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        //Note - empty will be a terminal event.
+        testObserver.assertNoErrors();
+        testObserver.assertNoValues();
+        testObserver.assertComplete();
     }
 
     @Test
@@ -506,12 +568,13 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
         LoadRawLeadsAction loadRawLeadsActionMock = Mockito.mock(LoadRawLeadsAction.class);
         LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMapMock = Mockito.mock(LoadRawDataInteractor.StoreRawLeadFlatMap.class);
-        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.DatabaseStatusCounterScanner.class));
+        LoadRawDataInteractor.StatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.StatusCounterScanner.class));
+        LoadRawDataInteractor.ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMapMock = Mockito.mock((LoadRawDataInteractor.ProcessRawLeadErrorFlatMap.class));
 
         //Data Bitch
-        RawLead rawLead = new RawLeadImpl();
+        RawLead rawLead = new RawLeadImplTest();
         LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
-        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter = new LoadRawDataInteractor.DatabaseStatusCounter();
+        LoadRawDataInteractor.StatusCounter databaseStatusCounter = new LoadRawDataInteractor.StatusCounter();
         databaseStatusCounter.numberOfColdLeadsAdded = 1;
 
         //When it up
@@ -529,6 +592,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
                 databaseGatewayMock,
                 loadRawLeadsActionMock,
                 storeRawLeadFlatMapMock,
+                processRawLeadErrorFlatMapMock,
                 databaseStatusCounterScannerMock
         );
 
@@ -567,13 +631,14 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
         LoadRawLeadsAction loadRawLeadsActionMock = Mockito.mock(LoadRawLeadsAction.class);
         LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMapMock = Mockito.mock(LoadRawDataInteractor.StoreRawLeadFlatMap.class);
-        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.DatabaseStatusCounterScanner.class));
+        LoadRawDataInteractor.StatusCounterScanner statusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.StatusCounterScanner.class));
+        LoadRawDataInteractor.ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMapMock = Mockito.mock((LoadRawDataInteractor.ProcessRawLeadErrorFlatMap.class));
 
         //Data Bitch
-        RawLead rawLead = new RawLeadImpl();
+        RawLead rawLead = new RawLeadImplTest();
         LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
-        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter = new LoadRawDataInteractor.DatabaseStatusCounter();
-        databaseStatusCounter.numberOfColdLeadsAdded = 2;
+        LoadRawDataInteractor.StatusCounter statusCounter = new LoadRawDataInteractor.StatusCounter();
+        statusCounter.numberOfColdLeadsAdded = 2;
 
         //When it up
         //Return two leads ...
@@ -583,7 +648,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
 
         when(loadRawLeadsActionMock.getCsvFile()).thenReturn(new File("Do Nothing"));
 
-        when(databaseStatusCounterScannerMock.apply(any(), any())).thenReturn(databaseStatusCounter);
+        when(statusCounterScannerMock.apply(any(), any())).thenReturn(statusCounter);
 
         LoadRawDataInteractor.LoadRawLeadsObservable loadRawLeadsObservable
                 = new LoadRawDataInteractor.LoadRawLeadsObservable(
@@ -591,7 +656,8 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
                 databaseGatewayMock,
                 loadRawLeadsActionMock,
                 storeRawLeadFlatMapMock,
-                databaseStatusCounterScannerMock
+                processRawLeadErrorFlatMapMock,
+                statusCounterScannerMock
         );
 
         //
@@ -608,7 +674,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         testObserver.assertComplete();
 
         //verify scanner was called twice
-        verify(databaseStatusCounterScannerMock, Mockito.times(2)).apply(any(), any());
+        verify(statusCounterScannerMock, Mockito.times(2)).apply(any(), any());
 
         LoadRawLeadsResult loadRawLeadsResult = (LoadRawLeadsResult) testObserver.getEvents().get(0).get(0);
         assertThat(loadRawLeadsResult.getType()).isEqualTo(Result.ResultType.SUCCESS);
@@ -633,12 +699,13 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
         LoadRawLeadsAction loadRawLeadsActionMock = Mockito.mock(LoadRawLeadsAction.class);
         LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMapMock = Mockito.mock(LoadRawDataInteractor.StoreRawLeadFlatMap.class);
-        LoadRawDataInteractor.DatabaseStatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.DatabaseStatusCounterScanner.class));
+        LoadRawDataInteractor.StatusCounterScanner databaseStatusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.StatusCounterScanner.class));
+        LoadRawDataInteractor.ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMapMock = Mockito.mock((LoadRawDataInteractor.ProcessRawLeadErrorFlatMap.class));
 
         //Data Bitch
-        RawLead rawLead = new RawLeadImpl();
+        RawLead rawLead = new RawLeadImplTest();
         LoadRawDataInteractor.DatabaseStatus databaseStatus = new LoadRawDataInteractor.DatabaseStatus();
-        LoadRawDataInteractor.DatabaseStatusCounter databaseStatusCounter = new LoadRawDataInteractor.DatabaseStatusCounter();
+        LoadRawDataInteractor.StatusCounter databaseStatusCounter = new LoadRawDataInteractor.StatusCounter();
         databaseStatusCounter.numberOfColdLeadsAdded = 2;
 
         //When it up
@@ -657,6 +724,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
                 databaseGatewayMock,
                 loadRawLeadsActionMock,
                 storeRawLeadFlatMapMock,
+                processRawLeadErrorFlatMapMock,
                 databaseStatusCounterScannerMock
         );
 
@@ -675,6 +743,82 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         //verify scanner was called twice
         verify(storeRawLeadFlatMapMock, Mockito.times(0)).apply(any());
         verify(databaseStatusCounterScannerMock, Mockito.times(0)).apply(any(), any());
+    }
+
+    @Test
+    public void LoadRawLeadsObservable_LoadColdLead_RawLeadError() throws Exception {
+        /*
+        Here we test you loaded the file correctly the but the RawLead was malformed in the file. Here we return
+        RawLead isError = true.
+         */
+
+        //
+        //Arrange
+        //
+        TestObserver<LoadRawLeadsResult> testObserver;
+
+        //Mocks Bitch
+        CsvFileController csvFileControllerMock = Mockito.mock(CsvFileController.class);
+        DatabaseGateway databaseGatewayMock = Mockito.mock(DatabaseGateway.class);
+        LoadRawLeadsAction loadRawLeadsActionMock = Mockito.mock(LoadRawLeadsAction.class);
+        LoadRawDataInteractor.StoreRawLeadFlatMap storeRawLeadFlatMapMock = Mockito.mock(LoadRawDataInteractor.StoreRawLeadFlatMap.class);
+        LoadRawDataInteractor.StatusCounterScanner statusCounterScannerMock = Mockito.mock((LoadRawDataInteractor.StatusCounterScanner.class));
+        LoadRawDataInteractor.ProcessRawLeadErrorFlatMap processRawLeadErrorFlatMapMock = Mockito.mock((LoadRawDataInteractor.ProcessRawLeadErrorFlatMap.class));
+
+        //Data Bitch
+        final String ERROR_MSG = "OMG I have a problem!";
+        RawLead rawLead = new RawLeadErrorImpl(ERROR_MSG);
+
+        LoadRawDataInteractor.CsvStatus csvStatus = new LoadRawDataInteractor.CsvStatus();
+        csvStatus.error = true;
+        csvStatus.errorMessage = ERROR_MSG;
+
+        LoadRawDataInteractor.StatusCounter statusCounter = new LoadRawDataInteractor.StatusCounter();
+        statusCounter.errorMessage = ERROR_MSG;
+        statusCounter.numberOfErrors = 1;
+
+        //When it up
+        when(csvFileControllerMock.readRawLeads(any())).thenReturn(Observable.just(rawLead));
+
+        when(processRawLeadErrorFlatMapMock.apply(rawLead)).thenReturn(Observable.just(csvStatus));
+
+        when(loadRawLeadsActionMock.getCsvFile()).thenReturn(new File("Do Nothing"));
+
+        when(statusCounterScannerMock.apply(any(), any())).thenReturn(statusCounter);
+
+        LoadRawDataInteractor.LoadRawLeadsObservable loadRawLeadsObservable
+                = new LoadRawDataInteractor.LoadRawLeadsObservable(
+                csvFileControllerMock,
+                databaseGatewayMock,
+                loadRawLeadsActionMock,
+                storeRawLeadFlatMapMock,
+                processRawLeadErrorFlatMapMock,
+                statusCounterScannerMock
+        );
+
+        //
+        //Act
+        //
+        testObserver = Single.fromObservable(Observable.create(loadRawLeadsObservable)).test();
+        testScheduler.triggerActions();
+
+        //
+        //Assert
+        //
+        testObserver.assertNoErrors();
+        testObserver.assertValueCount(1);
+        testObserver.assertComplete();
+
+        LoadRawLeadsResult loadRawLeadsResult = (LoadRawLeadsResult) testObserver.getEvents().get(0).get(0);
+        assertThat(loadRawLeadsResult.getType()).isEqualTo(Result.ResultType.SUCCESS);
+        assertThat(loadRawLeadsResult.isFileLoadError()).isFalse();
+        assertThat(loadRawLeadsResult.isUserCanceled()).isFalse();
+        assertThat(loadRawLeadsResult.getErrorMessage()).isEqualToIgnoringCase(ERROR_MSG);
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadDuplicates()).isEqualTo(0);
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadErrors()).isEqualTo(1);
+        assertThat(loadRawLeadsResult.getNumberOfColdLeadsSaved()).isEqualTo(0);
+
+        verify(storeRawLeadFlatMapMock, Mockito.times(0)).apply(rawLead);
     }
 
     @Test
@@ -702,7 +846,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
 
                 ObservableEmitter<LoadRawLeadsResult> emitter = (ObservableEmitter<LoadRawLeadsResult>) args[0];
 
-                emitter.onNext(LoadRawLeadsResult.success(0,5,0));
+                emitter.onNext(LoadRawLeadsResult.success(0,5,0, ""));
                 emitter.onComplete();
                 return null;
             }
@@ -831,7 +975,7 @@ public class LoadRawDataInteractorTest extends RxJavaTest {
         }
     }
 
-    class RawLeadImpl implements RawLead {
+    class RawLeadImplTest extends RawLeadCsvImpl {
 
         @Override
         public String getAddress() {

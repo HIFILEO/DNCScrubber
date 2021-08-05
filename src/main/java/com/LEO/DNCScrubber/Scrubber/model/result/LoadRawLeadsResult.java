@@ -45,9 +45,9 @@ public class LoadRawLeadsResult extends Result {
     }
 
     public static LoadRawLeadsResult success(int numberOfColdLeadDuplicates, int numberOfColdLeadsSaved,
-                                             int numberOfColdLeadErrors) {
+                                             int numberOfColdLeadErrors, String errorMessage) {
         return new LoadRawLeadsResult(Result.ResultType.SUCCESS,
-                "",
+                errorMessage,
                 false,
                 false,
                 numberOfColdLeadDuplicates,

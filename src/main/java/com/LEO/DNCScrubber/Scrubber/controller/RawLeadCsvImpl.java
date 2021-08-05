@@ -29,10 +29,20 @@ public class RawLeadCsvImpl implements RawLead {
 
     }
 
+    @Override
+    public boolean hasError() {
+        return false;
+    }
+
+    @Override
+    public String getErrorMessage() {
+        return "";
+    }
+
     @CsvBindByName(column = "Address", required = true)
     private String address;
 
-    @CsvBindByName(column = "Unit #", required = false)
+    @CsvBindByName(column = "Unit #")
     private String unitNumber;
 
     @CsvBindByName(column = "City", required = true)
@@ -53,10 +63,10 @@ public class RawLeadCsvImpl implements RawLead {
     @CsvBindByName(column = "Owner Occupied", required = true)
     private boolean ownerOccupied;
 
-    @CsvBindByName(column = "Owner 1 First Name")
+    @CsvBindByName(column = "Owner 1 First Name", required = true)
     private String ownerOneFirstName;
 
-    @CsvBindByName(column = "Owner 1 Last Name")
+    @CsvBindByName(column = "Owner 1 Last Name", required = true)
     private String ownerOneLastName;
 
     @CsvBindByName(column = "Company Name")
