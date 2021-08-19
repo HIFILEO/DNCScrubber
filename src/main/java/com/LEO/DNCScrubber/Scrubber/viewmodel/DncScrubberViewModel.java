@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 
 public class DncScrubberViewModel {
     final static Logger logger = LoggerFactory.getLogger(DncScrubberViewModel.class);
@@ -86,6 +87,8 @@ public class DncScrubberViewModel {
                         return processNoSelectionResult(uiModel, (NoSelectionResult) result);
                     } else if (result instanceof LoadFileDialogResult) {
                         return processLoadFileDialogResult(uiModel, (LoadFileDialogResult) result);
+                    } else if (result instanceof SaveFileDialogResult) {
+                        return processSaveFileDialogResult(uiModel, (SaveFileDialogResult) result);
                     }
 
                     //Unknown result - throw error
@@ -119,12 +122,19 @@ public class DncScrubberViewModel {
                 upstream -> upstream.flatMap((Function<LoadFileDialogEvent, ObservableSource<LoadFileDialogAction>>)
                         this::transformLoadFileDialog);
 
+        final ObservableTransformer<SaveFileDialogEvent, SaveFileDialogAction> transformSaveFileDialog =
+                upstream -> upstream.flatMap((Function<SaveFileDialogEvent, ObservableSource<SaveFileDialogAction>>)
+                        this::transformSaveFileDialog);
+
         transformEventsIntoActions = upstream -> upstream.publish(uiEventObservable ->
                 Observable.merge(
-                        uiEventObservable.ofType(LoadRawLeadsEvent.class).compose(transformLoadRawLeads),
-                        uiEventObservable.ofType(ExitEvent.class).compose(transformExit),
-                        uiEventObservable.ofType(NoSelectionEvent.class).compose(transformNoSelection),
-                        uiEventObservable.ofType(LoadFileDialogEvent.class).compose(transformLoadFileDialog)
+                        Arrays.asList(
+                                uiEventObservable.ofType(LoadRawLeadsEvent.class).compose(transformLoadRawLeads),
+                                uiEventObservable.ofType(ExitEvent.class).compose(transformExit),
+                                uiEventObservable.ofType(NoSelectionEvent.class).compose(transformNoSelection),
+                                uiEventObservable.ofType(LoadFileDialogEvent.class).compose(transformLoadFileDialog),
+                                uiEventObservable.ofType(SaveFileDialogEvent.class).compose(transformSaveFileDialog)
+                        )
                 )
         );
     }
@@ -148,6 +158,15 @@ public class DncScrubberViewModel {
                         loadFileDialogEvent.isUserCanceled(),
                         loadFileDialogEvent.isFileLoadError(),
                         loadFileDialogEvent.getErrorMessage())
+        );
+    }
+
+    private Observable<SaveFileDialogAction> transformSaveFileDialog(SaveFileDialogEvent saveFileDialogEvent) {
+        return Observable.just(
+                new SaveFileDialogAction(saveFileDialogEvent.getCommandType(),
+                        saveFileDialogEvent.isUserCanceled(),
+                        saveFileDialogEvent.isFileSaveError(),
+                        saveFileDialogEvent.getErrorMessage())
         );
     }
 
@@ -218,6 +237,44 @@ public class DncScrubberViewModel {
             default:
                 //Unknown result - throw error
                 throw new IllegalArgumentException("Unknown ResultType: " + loadFileDialogResult.getType());
+        }
+
+        return uiModelBuilder.createUiModel();
+    }
+
+    private UiModel processSaveFileDialogResult(UiModel uiModel, SaveFileDialogResult saveFileDialogResult) {
+        UiModel.UiModelBuilder uiModelBuilder = new UiModel.UiModelBuilder(uiModel);
+
+        switch (saveFileDialogResult.getType()) {
+            case Result.ResultType.FAILURE:
+                uiModelBuilder.setCommand(CommandType.NONE);
+                uiModelBuilder.setShowSaveFileDialog(false);
+
+                if (saveFileDialogResult.isUserCanceled()) {
+                    uiModelBuilder.setScreenMessage(CommandType.SAVE_FILE_DIALOG + " - " +
+                            screenData.getDialogCancel() + "\n\n" +
+                            screenData.getMainCommands());
+
+                } else if (saveFileDialogResult.isFileSaveError()) {
+                    uiModelBuilder.setScreenMessage(CommandType.SAVE_FILE_DIALOG + " -  " +
+                            screenData.getError() + "\n" +
+                            "Error Msg: " + saveFileDialogResult.getErrorMessage()+ "\n\n" +
+                            screenData.getMainCommands());
+                }
+
+                uiModelBuilder.setInFlight(false);
+                break;
+            case Result.ResultType.SUCCESS:
+                uiModelBuilder.setShowSaveFileDialog(true);
+                uiModelBuilder.setCommand(saveFileDialogResult.getCommandType());
+                uiModelBuilder.setScreenMessage(CommandType.SAVE_FILE_DIALOG + " - " +
+                        screenData.getSuccess() + "\n\n" + screenData.getMainCommands());
+                uiModelBuilder.setInFlight(false);
+                break;
+            case Result.ResultType.IN_FLIGHT:
+            default:
+                //Unknown result - throw error
+                throw new IllegalArgumentException("Unknown ResultType: " + saveFileDialogResult.getType());
         }
 
         return uiModelBuilder.createUiModel();

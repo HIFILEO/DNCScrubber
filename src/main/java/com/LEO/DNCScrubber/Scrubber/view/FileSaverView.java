@@ -16,19 +16,23 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.DateFormatter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
-public class FileChooserView extends Component {
-    final static Logger logger = LoggerFactory.getLogger(FileChooserView.class);
-
+public class FileSaverView extends Component {
+    final static Logger logger = LoggerFactory.getLogger(FileSaverView.class);
+    final private  String pattern = "MM-dd-yyyy-HH-mm-ss";
     private JFileChooser fileChooser = new JFileChooser();
     private JFrame frame;
     private File file;
@@ -36,7 +40,7 @@ public class FileChooserView extends Component {
     private boolean fileLoadError;
     private String errorMessage;
 
-    public FileChooserView() {
+    public FileSaverView() {
         //Try and open the running directory first always.
         try {
             fileChooser.setCurrentDirectory(new File((new File(".").getCanonicalPath())));
@@ -44,6 +48,9 @@ public class FileChooserView extends Component {
             logger.warn("File path for current directory failed. Set file chooser to User Home");
             fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         }
+
+        //Title of Dialog
+        fileChooser.setDialogTitle("Export Raw Leads To Skip Trace");
 
         //only allow CSV files
         FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV FILES", "csv");
@@ -60,8 +67,11 @@ public class FileChooserView extends Component {
      *  Blocking Call
      *  </p>
      */
-    public void showChooser() {
-        file = null;
+    public void showSavDialog() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        Date date = new Date(System.currentTimeMillis());
+        String fileName = simpleDateFormat.format(date) + "-Raw Leads To Skip Trace.csv";
+
         userCanceled = false;
         fileLoadError = false;
         errorMessage = null;
@@ -69,7 +79,8 @@ public class FileChooserView extends Component {
         /*
         Blocking Call
         */
-        int result = fileChooser.showOpenDialog(frame);
+        fileChooser.setSelectedFile(new File(fileName));
+        int result = fileChooser.showSaveDialog(frame);
 
         if (result == JFileChooser.APPROVE_OPTION) {
             try {

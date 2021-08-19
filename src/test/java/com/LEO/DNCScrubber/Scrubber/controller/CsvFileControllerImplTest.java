@@ -17,12 +17,9 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.interactor.RawLeadConvertor;
-import com.LEO.DNCScrubber.Scrubber.model.data.ColdRvmLead;
 import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import com.LEO.DNCScrubber.rx.RxJavaTest;
 import com.LEO.DNCScrubber.util.Visitors;
-import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;

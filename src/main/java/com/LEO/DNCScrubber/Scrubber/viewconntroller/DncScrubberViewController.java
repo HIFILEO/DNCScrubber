@@ -6,6 +6,7 @@ import com.LEO.DNCScrubber.Scrubber.model.event.*;
 import com.LEO.DNCScrubber.Scrubber.model.uiModel.UiModel;
 import com.LEO.DNCScrubber.Scrubber.view.DncScrubberMainView;
 import com.LEO.DNCScrubber.Scrubber.view.FileChooserView;
+import com.LEO.DNCScrubber.Scrubber.view.FileSaverView;
 import com.LEO.DNCScrubber.Scrubber.viewmodel.DncScrubberViewModel;
 import io.reactivex.*;
 import io.reactivex.disposables.CompositeDisposable;
@@ -103,9 +104,8 @@ public class DncScrubberViewController {
      */
     private void bind() {
         //
-        //Bind to UiModel
+        //Bind Window - When window closes, kill program.
         //
-        //When window closes, kill program.
         dncScrubberMainView.frame.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
@@ -143,7 +143,9 @@ public class DncScrubberViewController {
             }
         });
 
+        //
         //Bind Button
+        //
         compositeDisposable.add(Observable.create(new ObservableOnSubscribe<ActionEvent>() {
 
             @Override
@@ -156,33 +158,45 @@ public class DncScrubberViewController {
                 });
             }
         })
-                .debounce(250, TimeUnit.MILLISECONDS)
-                .subscribeOn(uiScheduler)
-                .subscribe(new Consumer<ActionEvent>() {
-                    @Override
-                    public void accept(ActionEvent actionEvent) throws Exception {
-                        List<String> selectedItems = (List<String>) dncScrubberMainView.commandList.getSelectedValuesList();
-                        if (selectedItems.isEmpty()) {
+            .debounce(250, TimeUnit.MILLISECONDS)
+            .subscribeOn(uiScheduler)
+            .subscribe(new Consumer<ActionEvent>() {
+                @Override
+                public void accept(ActionEvent actionEvent) throws Exception {
+                    //Switch off ScreenInfo (File)
+                    switch (dncScrubberMainView.commandList.getSelectedIndex()) {
+                        //Nothing Selected
+                        case -1:
                             dncScrubberViewModel.processUiEvent(new NoSelectionEvent());
-                        } else {
-                            //Load Raw Leads
-                            String selectedItem = selectedItems.get(0);
-                            if (selectedItem.equalsIgnoreCase(screenData.getCommands()[0])) {
-                                dncScrubberViewModel.processUiEvent(new LoadFileDialogEvent(
-                                        CommandType.LOAD_RAW_LEADS, false, false, ""));
-                            }
-                        }
+                            break;
+                        //Load Raw Leads
+                        case 0:
+                            dncScrubberViewModel.processUiEvent(
+                                    new LoadFileDialogEvent(CommandType.LOAD_RAW_LEADS,
+                                            false, false, ""));
+                            break;
+                        //Save Raw Leads To Skip Trace
+                        case 1:
+                            dncScrubberViewModel.processUiEvent(
+                                    new SaveFileDialogEvent(CommandType.SAVE_LEADS_TO_SKIP_TRACE,
+                                            false, false, ""));
+                            break;
+                        default:
+                            throw new Exception("Button not bound to correct action. Throwing error.");
                     }
-                }));
+                }
+            }));
 
+        //
+        //Bind to UiModel
+        //
         compositeDisposable.add(dncScrubberViewModel.getUiModels()
-                .subscribeOn(uiScheduler)
-                .subscribe(
-                        this::processUiModel,
-                        throwable -> {
-                            throw new UnsupportedOperationException("Errors from Model Unsupported: "
-                                    + throwable.getLocalizedMessage());
-                        })
+            .subscribeOn(uiScheduler)
+            .subscribe(this::processUiModel,
+                    throwable -> {
+                        throw new UnsupportedOperationException("Errors from Model Unsupported: "
+                                + throwable.getLocalizedMessage());
+                    })
         );
     }
 
@@ -227,7 +241,7 @@ public class DncScrubberViewController {
             dncScrubberMainView.executeCommandButton.setEnabled(true);
         }
 
-        //FileChooserView
+        //Load File Dialog
         if (uiModel.isShowLoadFileDialog()) {
             Single.create(new SingleOnSubscribe<UiEvent>() {
                 @Override
@@ -252,6 +266,40 @@ public class DncScrubberViewController {
                                         fileChooserView.isUserCanceled(),
                                         fileChooserView.isFileLoadError(),
                                         fileChooserView.getErrorMessage()));
+                    }
+                }
+            }).subscribe(new Consumer<UiEvent>() {
+                @Override
+                public void accept(UiEvent uiEvent) throws Exception {
+                    dncScrubberViewModel.processUiEvent(uiEvent);
+                }
+            });
+        }
+
+        //Save File Dialog
+        if (uiModel.isShowSaveFileDialog()) {
+            Single.create(new SingleOnSubscribe<UiEvent>() {
+                @Override
+                public void subscribe(SingleEmitter<UiEvent> emitter) throws Exception {
+                    FileSaverView fileSaverView = new FileSaverView();
+                    fileSaverView.showSavDialog();
+
+                    File file = fileSaverView.getFile();
+                    if (file != null) {
+                        switch (uiModel.getCommand()) {
+                            case SAVE_LEADS_TO_SKIP_TRACE:
+                                //TODO - oh so much fun
+                                //emitter.onSuccess(new LoadRawLeadsEvent(file));
+                                break;
+                            default:
+                                throw new Exception("Wrong command Type! Should never happen!");
+                        }
+                    } else {
+                        emitter.onSuccess(new SaveFileDialogEvent
+                                (CommandType.NONE,
+                                        fileSaverView.isUserCanceled(),
+                                        fileSaverView.isFileLoadError(),
+                                        fileSaverView.getErrorMessage()));
                     }
                 }
             }).subscribe(new Consumer<UiEvent>() {

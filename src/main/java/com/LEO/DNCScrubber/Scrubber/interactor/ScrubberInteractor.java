@@ -25,6 +25,8 @@ import io.reactivex.*;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 
+import java.util.Arrays;
+
 /**
  * Interactor for DNC Scrubber application.
  */
@@ -56,15 +58,22 @@ public class ScrubberInteractor {
                 upstream.flatMap((Function<LoadFileDialogAction, ObservableSource<LoadFileDialogResult>>)
                         this::transformLoadFileDialog);
 
+        ObservableTransformer<SaveFileDialogAction, SaveFileDialogResult> transformSaveFileDialog = upstream ->
+                upstream.flatMap((Function<SaveFileDialogAction, ObservableSource<SaveFileDialogResult>>)
+                        this::transformSaveFileDialog);
+
         transformActionIntoResults = upstream -> upstream.publish
                 (new Function<Observable<Action>, ObservableSource<Result>>() {
             @Override
             public ObservableSource<Result> apply(Observable<Action> actionObservable) {
                 return Observable.merge(
+                    Arrays.asList(
                         actionObservable.ofType(ExitAction.class).compose(transformExit),
                         actionObservable.ofType(LoadFileDialogAction.class).compose(transformLoadFileDialog),
                         actionObservable.ofType(LoadRawLeadsAction.class).compose(transformLoadRawLead),
-                        actionObservable.ofType(NoSelectionAction.class).compose(transformNoSelection)
+                        actionObservable.ofType(NoSelectionAction.class).compose(transformNoSelection),
+                        actionObservable.ofType(SaveFileDialogAction.class).compose(transformSaveFileDialog)
+                    )
                 );
             }
         });
@@ -97,6 +106,15 @@ public class ScrubberInteractor {
                         loadFileDialogAction.isUserCanceled(),
                         loadFileDialogAction.isFileLoadError(),
                         loadFileDialogAction.getErrorMessage())
+        );
+    }
+
+    private Observable<SaveFileDialogResult> transformSaveFileDialog(SaveFileDialogAction saveFileDialogAction) {
+        return Observable.just(
+                new SaveFileDialogResult(saveFileDialogAction.getCommandType(),
+                        saveFileDialogAction.isUserCanceled(),
+                        saveFileDialogAction.isFileSaveError(),
+                        saveFileDialogAction.getErrorMessage())
         );
     }
 }

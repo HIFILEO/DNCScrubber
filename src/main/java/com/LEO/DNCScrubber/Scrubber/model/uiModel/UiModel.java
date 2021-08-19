@@ -25,23 +25,25 @@ public class UiModel {
     private final boolean inFlight;
     private final boolean exit;
     private final boolean showLoadFileDialog;
+    private final boolean showSaveFileDialog;
     private final CommandType command;
 
     public UiModel(String screenMessage, boolean inFlight, boolean exit, boolean showLoadFileDialog,
-                   CommandType command) {
+                   boolean showSaveFileDialog, CommandType command) {
         this.screenMessage = screenMessage;
         this.inFlight = inFlight;
         this.exit = exit;
         this.command = command;
         this.showLoadFileDialog = showLoadFileDialog;
+        this.showSaveFileDialog = showSaveFileDialog;
     }
 
     public static UiModel init(String screenMessage) {
-        return new UiModel(screenMessage, false, false, false, CommandType.NONE);
+        return new UiModel(screenMessage, false, false, false, false, CommandType.NONE);
     }
 
     public static UiModel exit() {
-        return new UiModel(null, false, true, false,
+        return new UiModel(null, false, true, false, false,
                 CommandType.NONE);
     }
 
@@ -61,6 +63,10 @@ public class UiModel {
         return showLoadFileDialog;
     }
 
+    public boolean isShowSaveFileDialog() {
+        return showSaveFileDialog;
+    }
+
     public CommandType getCommand() {
         return command;
     }
@@ -74,6 +80,7 @@ public class UiModel {
         private boolean inFlight;
         private boolean exit;
         private boolean showLoadFileDialog;
+        private boolean showSaveFileDialog;
         private CommandType command;
 
         /**
@@ -94,7 +101,7 @@ public class UiModel {
          * @return new {@link UiModel}.
          */
         public UiModel createUiModel() {
-            return new UiModel(screenMessage, inFlight, exit, showLoadFileDialog, command);
+            return new UiModel(screenMessage, inFlight, exit, showLoadFileDialog, showSaveFileDialog, command);
         }
 
         public UiModelBuilder setScreenMessage(String screenMessage) {
@@ -115,6 +122,10 @@ public class UiModel {
         public UiModelBuilder setShowLoadFileDialog(boolean showLoadFileDialog) {
             this.showLoadFileDialog = showLoadFileDialog;
             return this;
+        }
+
+        public void setShowSaveFileDialog(boolean showSaveFileDialog) {
+            this.showSaveFileDialog = showSaveFileDialog;
         }
 
         public UiModelBuilder setCommand(CommandType command) {

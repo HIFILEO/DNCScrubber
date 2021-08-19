@@ -5,7 +5,8 @@
   "fileNameMessage" : "Enter the name of the file to load:",
   "inProgress" : "in progress",
   "commands": [
-        "Load Raw Lead Data"
+        "Load Raw Lead Data",
+        "Export Leads To Skip Trace"
         ],
   "noSelectionMade" : "No selection made. Please highlight a selection and hit execute button",
   "dialogCancel" : "File Selector Dialog Canceled",
