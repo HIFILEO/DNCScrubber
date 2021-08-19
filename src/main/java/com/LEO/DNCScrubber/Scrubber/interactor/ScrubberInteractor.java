@@ -17,15 +17,10 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.CsvFileReader;
-import com.LEO.DNCScrubber.Scrubber.model.action.Action;
-import com.LEO.DNCScrubber.Scrubber.model.action.ExitAction;
-import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
-import com.LEO.DNCScrubber.Scrubber.model.action.NoSelectionAction;
-import com.LEO.DNCScrubber.Scrubber.model.result.ExitResult;
-import com.LEO.DNCScrubber.Scrubber.model.result.LoadRawLeadsResult;
-import com.LEO.DNCScrubber.Scrubber.model.result.NoSelectionResult;
-import com.LEO.DNCScrubber.Scrubber.model.result.Result;
+import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
+import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
+import com.LEO.DNCScrubber.Scrubber.model.action.*;
+import com.LEO.DNCScrubber.Scrubber.model.result.*;
 import io.reactivex.*;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
@@ -34,69 +29,32 @@ import io.reactivex.functions.Function;
  * Interactor for DNC Scrubber application.
  */
 public class ScrubberInteractor {
-    private final CsvFileReader csvFileReader;
+    private final LoadRawDataInteractor loadRawDataInteractor;
 
-    @NonNull
-    private final ObservableTransformer<ExitAction, ExitResult> transformExit;
-
-    @NonNull
-    private final ObservableTransformer<LoadRawLeadsAction, LoadRawLeadsResult> transformLoadRawLead;
-
-    @NonNull
-    private final ObservableTransformer<NoSelectionAction, NoSelectionResult> transformNoSelection;
     @NonNull
     private final ObservableTransformer<Action, Result> transformActionIntoResults;
 
-    public ScrubberInteractor(CsvFileReader csvFileReader) {
-        this.csvFileReader = csvFileReader;
+    public ScrubberInteractor(CsvFileController csvFileController, DatabaseGateway databaseGateway) {
+        this.loadRawDataInteractor= new LoadRawDataInteractor(csvFileController, databaseGateway);
 
         /*
         Note the 'upstream->' represents new ObservableTransformer<T1,T1>
          */
-        transformExit = upstream -> {
-            return upstream.flatMap(new Function<ExitAction, ObservableSource<ExitResult>>() {
-                @Override
-                public ObservableSource<ExitResult> apply(ExitAction exitAction) throws Exception {
-                    return  Observable.just(new ExitResult());
-                }
-            });
-        };
+        ObservableTransformer<ExitAction, ExitResult> transformExit = upstream ->
+                upstream.flatMap((Function<ExitAction, ObservableSource<ExitResult>>)
+                        this::transformExit);
 
-        transformNoSelection = upstream -> upstream.flatMap((Function<NoSelectionAction, ObservableSource<NoSelectionResult>>)
-                noSelectionAction -> Observable.just(new NoSelectionResult()));
+        ObservableTransformer<NoSelectionAction, NoSelectionResult> transformNoSelection = upstream ->
+                upstream.flatMap((Function<NoSelectionAction, ObservableSource<NoSelectionResult>>)
+                        this::transformNoSelection);
 
-        transformLoadRawLead = upstream -> {
-           return upstream.flatMap((Function<LoadRawLeadsAction, ObservableSource<LoadRawLeadsResult>>) loadRawLeadsAction -> {
+        ObservableTransformer<LoadRawLeadsAction, LoadRawLeadsResult> transformLoadRawLead = upstream ->
+                upstream.flatMap((Function<LoadRawLeadsAction, ObservableSource<LoadRawLeadsResult>>)
+                this::transformLoadRawLead);
 
-               //1 - create a completable - you only care if you load file and save or throw errors. No values needed.
-               //2  - andThen - change the completable back into Observable
-               //3 - start with so things update on the UI.
-               return Completable.create(new CompletableOnSubscribe() {
-                   @Override
-                   public void subscribe(CompletableEmitter emitter) throws Exception {
-                       csvFileReader.readRawLeadData("new_haven_test.csv")
-                               .count()
-                               .subscribe(numberOfItemsEmitted -> emitter.onComplete(),
-                                       emitter::onError
-                               );
-                   }
-               }).andThen(new ObservableSource<LoadRawLeadsResult>() {
-                   @Override
-                   public void subscribe(Observer<? super LoadRawLeadsResult> observer) {
-                       observer.onNext(new LoadRawLeadsResult(Result.ResultType.SUCCESS, false,
-                               ""));
-                   }
-               }).onErrorReturn(new Function<Throwable, LoadRawLeadsResult>() {
-                   @Override
-                   public LoadRawLeadsResult apply(Throwable throwable) throws Exception {
-                       return new LoadRawLeadsResult(Result.ResultType.FAILURE, false,
-                               throwable.getMessage());
-                   }
-               })
-                       .startWith(LoadRawLeadsResult.inFlight(true));
-
-           });
-       };
+        ObservableTransformer<LoadFileDialogAction, LoadFileDialogResult> transformLoadFileDialog = upstream ->
+                upstream.flatMap((Function<LoadFileDialogAction, ObservableSource<LoadFileDialogResult>>)
+                        this::transformLoadFileDialog);
 
         transformActionIntoResults = upstream -> upstream.publish
                 (new Function<Observable<Action>, ObservableSource<Result>>() {
@@ -104,6 +62,7 @@ public class ScrubberInteractor {
             public ObservableSource<Result> apply(Observable<Action> actionObservable) {
                 return Observable.merge(
                         actionObservable.ofType(ExitAction.class).compose(transformExit),
+                        actionObservable.ofType(LoadFileDialogAction.class).compose(transformLoadFileDialog),
                         actionObservable.ofType(LoadRawLeadsAction.class).compose(transformLoadRawLead),
                         actionObservable.ofType(NoSelectionAction.class).compose(transformNoSelection)
                 );
@@ -118,5 +77,26 @@ public class ScrubberInteractor {
      */
     public Observable<Result> processAction(Observable<Action> actions) {
         return actions.compose(transformActionIntoResults);
+    }
+
+    private Observable<ExitResult> transformExit(ExitAction exitAction) {
+        return Observable.just(new ExitResult());
+    }
+
+    private Observable<NoSelectionResult> transformNoSelection(NoSelectionAction noSelectionAction) {
+        return Observable.just(new NoSelectionResult());
+    }
+
+    private Observable<LoadRawLeadsResult> transformLoadRawLead(LoadRawLeadsAction loadRawLeadsAction) {
+        return loadRawDataInteractor.processLoadRawLeadsAction(loadRawLeadsAction);
+    }
+
+    private Observable<LoadFileDialogResult> transformLoadFileDialog(LoadFileDialogAction loadFileDialogAction) {
+        return Observable.just(
+                new LoadFileDialogResult(loadFileDialogAction.getCommandType(),
+                        loadFileDialogAction.isUserCanceled(),
+                        loadFileDialogAction.isFileLoadError(),
+                        loadFileDialogAction.getErrorMessage())
+        );
     }
 }

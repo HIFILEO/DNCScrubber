@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.uiModel;/*
+package com.LEO.DNCScrubber.Scrubber.gateway;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,19 +17,26 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.util.List;
+import com.LEO.DNCScrubber.Scrubber.model.data.ColdRvmLead;
+import com.LEO.DNCScrubber.Scrubber.model.data.Person;
+import com.LEO.DNCScrubber.Scrubber.model.data.Property;
+import io.reactivex.Observable;
 
 /**
- * Java representation of JSON file for screen data.
+ * Gateway for interacting with a database for persistence.
  */
-public class ScreenInfo {
-    public String mainCommands;
-    public String error;
-    public String success;
-    public String fileNameMessage;
-    public String[] commands;
-    public String noSelectionMade;
-    public String inProgress;
-    public String dialogCancel;
-    public String dialogFailure;
+public interface DatabaseGateway {
+
+    /**
+     * Write a single {@link ColdRvmLead} to the database. Will update or save.
+     * @param coldRvmLead - lead to write
+     * @return - {@link Observable} boolean if successful, false otherwise
+     */
+    Observable<Boolean> writeColdRvmLead(ColdRvmLead coldRvmLead);
+
+    Observable<ColdRvmLead> loadColdRvmLeadByNaturalId(String naturalId);
+
+    Observable<Person> loadPersonByNaturalId(String naturalId);
+
+    Observable<Property> loadPropertyByNaturalId(String naturalId);
 }

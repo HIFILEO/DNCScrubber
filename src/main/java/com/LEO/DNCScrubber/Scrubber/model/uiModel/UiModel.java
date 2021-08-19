@@ -24,21 +24,25 @@ public class UiModel {
     private final String screenMessage;
     private final boolean inFlight;
     private final boolean exit;
-    private final CommandType previousCommand;
+    private final boolean showLoadFileDialog;
+    private final CommandType command;
 
-    public UiModel(String screenMessage, boolean inFlight, boolean exit, CommandType previousCommand) {
+    public UiModel(String screenMessage, boolean inFlight, boolean exit, boolean showLoadFileDialog,
+                   CommandType command) {
         this.screenMessage = screenMessage;
         this.inFlight = inFlight;
         this.exit = exit;
-        this.previousCommand = previousCommand;
+        this.command = command;
+        this.showLoadFileDialog = showLoadFileDialog;
     }
 
     public static UiModel init(String screenMessage) {
-        return new UiModel(screenMessage, false, false, CommandType.NONE);
+        return new UiModel(screenMessage, false, false, false, CommandType.NONE);
     }
 
     public static UiModel exit() {
-        return new UiModel(null, false, true, CommandType.NONE);
+        return new UiModel(null, false, true, false,
+                CommandType.NONE);
     }
 
     public String getScreenMessage() {
@@ -53,8 +57,12 @@ public class UiModel {
         return exit;
     }
 
-    public CommandType getPreviousCommand() {
-        return previousCommand;
+    public boolean isShowLoadFileDialog() {
+        return showLoadFileDialog;
+    }
+
+    public CommandType getCommand() {
+        return command;
     }
 
     /**
@@ -62,11 +70,11 @@ public class UiModel {
      */
     public static class UiModelBuilder {
         private final UiModel uiModel;
-
         private String screenMessage;
         private boolean inFlight;
         private boolean exit;
-        private CommandType previousCommand;
+        private boolean showLoadFileDialog;
+        private CommandType command;
 
         /**
          * Construct Builder using defaults from previous {@link UiModel}.
@@ -78,7 +86,7 @@ public class UiModel {
             this.screenMessage = uiModel.screenMessage;
             this.inFlight = uiModel.inFlight;
             this.exit = uiModel.exit;
-            this.previousCommand = uiModel.previousCommand;
+            this.command = uiModel.command;
         }
 
         /**
@@ -86,7 +94,7 @@ public class UiModel {
          * @return new {@link UiModel}.
          */
         public UiModel createUiModel() {
-            return new UiModel(screenMessage, inFlight, exit, previousCommand);
+            return new UiModel(screenMessage, inFlight, exit, showLoadFileDialog, command);
         }
 
         public UiModelBuilder setScreenMessage(String screenMessage) {
@@ -104,8 +112,13 @@ public class UiModel {
             return this;
         }
 
-        public UiModelBuilder setPreviousCommand(CommandType previousCommand) {
-            this.previousCommand = previousCommand;
+        public UiModelBuilder setShowLoadFileDialog(boolean showLoadFileDialog) {
+            this.showLoadFileDialog = showLoadFileDialog;
+            return this;
+        }
+
+        public UiModelBuilder setCommand(CommandType command) {
+            this.command = command;
             return this;
         }
     }

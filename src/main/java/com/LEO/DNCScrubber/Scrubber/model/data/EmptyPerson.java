@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.uiModel;/*
+package com.LEO.DNCScrubber.Scrubber.model.data;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,19 +17,26 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.util.List;
-
 /**
- * Java representation of JSON file for screen data.
+ * This represents an Empty {@link Person}
  */
-public class ScreenInfo {
-    public String mainCommands;
-    public String error;
-    public String success;
-    public String fileNameMessage;
-    public String[] commands;
-    public String noSelectionMade;
-    public String inProgress;
-    public String dialogCancel;
-    public String dialogFailure;
+public class EmptyPerson extends Person {
+
+    public EmptyPerson(String firstName, String lastName, Address address) {
+        super(firstName, lastName, address);
+    }
+
+    public static EmptyPerson createEmptyPerson() {
+        Address address = new Address(
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE"
+        );
+
+        return new EmptyPerson("", "", address);
+    }
 }

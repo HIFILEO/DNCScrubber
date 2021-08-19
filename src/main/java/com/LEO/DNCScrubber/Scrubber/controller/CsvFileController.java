@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.uiModel;/*
+package com.LEO.DNCScrubber.Scrubber.controller;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,19 +17,22 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.util.List;
+import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
+import io.reactivex.Observable;
+
+import java.io.File;
 
 /**
- * Java representation of JSON file for screen data.
+ * Controller for interacting with CSV File types.
  */
-public class ScreenInfo {
-    public String mainCommands;
-    public String error;
-    public String success;
-    public String fileNameMessage;
-    public String[] commands;
-    public String noSelectionMade;
-    public String inProgress;
-    public String dialogCancel;
-    public String dialogFailure;
+public interface CsvFileController {
+
+    /**
+     * Reads the given CSV file and returns each line as it's own {@link RawLead} object.
+     *
+     * @param file - a CSV file that conforms to the {@link RawLead}
+     * @return {@link RawLead} (including ones with errors) until EOF is reached, then On Complete is called.
+     * Will throw OnError where appropriate.
+     */
+    Observable<RawLead> readRawLeads(File file);
 }

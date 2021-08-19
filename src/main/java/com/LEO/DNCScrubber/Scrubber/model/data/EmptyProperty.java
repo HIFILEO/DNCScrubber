@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.uiModel;/*
+package com.LEO.DNCScrubber.Scrubber.model.data;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,19 +17,27 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.util.List;
-
 /**
- * Java representation of JSON file for screen data.
+ * This class represents an Empty {@link Property}.
  */
-public class ScreenInfo {
-    public String mainCommands;
-    public String error;
-    public String success;
-    public String fileNameMessage;
-    public String[] commands;
-    public String noSelectionMade;
-    public String inProgress;
-    public String dialogCancel;
-    public String dialogFailure;
+public class EmptyProperty extends Property {
+
+    public EmptyProperty(String aPN, Address address) {
+        super(aPN, address);
+    }
+
+    public static EmptyProperty createEmptyProperty() {
+        Address address = new Address(
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE",
+                "Empty - DO NOT USE"
+        );
+
+        return new EmptyProperty("", address);
+    }
+
 }

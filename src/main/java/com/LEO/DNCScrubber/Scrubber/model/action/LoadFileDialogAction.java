@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.uiModel;/*
+package com.LEO.DNCScrubber.Scrubber.model.action;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,19 +17,35 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.util.List;
+import com.LEO.DNCScrubber.Scrubber.model.CommandType;
 
-/**
- * Java representation of JSON file for screen data.
- */
-public class ScreenInfo {
-    public String mainCommands;
-    public String error;
-    public String success;
-    public String fileNameMessage;
-    public String[] commands;
-    public String noSelectionMade;
-    public String inProgress;
-    public String dialogCancel;
-    public String dialogFailure;
+public class LoadFileDialogAction extends Action {
+    private final CommandType commandType;
+    private final boolean userCanceled;
+    private final boolean fileLoadError;
+    private final String errorMessage;
+
+    public LoadFileDialogAction(CommandType commandType, boolean userCanceled, boolean fileLoadError,
+                                String errorMessage) {
+        this.commandType = commandType;
+        this.userCanceled = userCanceled;
+        this.fileLoadError = fileLoadError;
+        this.errorMessage = errorMessage;
+    }
+
+    public CommandType getCommandType() {
+        return commandType;
+    }
+
+    public boolean isUserCanceled() {
+        return userCanceled;
+    }
+
+    public boolean isFileLoadError() {
+        return fileLoadError;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
 }

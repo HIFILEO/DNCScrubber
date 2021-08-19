@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.uiModel;/*
+package com.LEO.DNCScrubber.Scrubber.controller;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,19 +17,22 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.util.List;
+import com.opencsv.bean.BeanVerifier;
+import com.opencsv.exceptions.CsvConstraintViolationException;
 
-/**
- * Java representation of JSON file for screen data.
- */
-public class ScreenInfo {
-    public String mainCommands;
-    public String error;
-    public String success;
-    public String fileNameMessage;
-    public String[] commands;
-    public String noSelectionMade;
-    public String inProgress;
-    public String dialogCancel;
-    public String dialogFailure;
+public class RawLedVerifier implements BeanVerifier {
+    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
+
+    @Override
+    public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
+        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
+        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
+                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
+                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
+                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
+            throw new CsvConstraintViolationException(ERROR_MSG);
+        }
+
+        return true;
+    }
 }

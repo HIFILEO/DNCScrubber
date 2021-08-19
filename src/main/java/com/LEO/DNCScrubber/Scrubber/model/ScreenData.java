@@ -140,6 +140,21 @@ public class ScreenData {
         return screenInfo.noSelectionMade;
     }
 
+    public String getInProgress() {
+        sync();
+        return screenInfo.inProgress;
+    }
+
+    public String getDialogCancel() {
+        sync();
+        return screenInfo.dialogCancel;
+    }
+
+    public String getDialogFailure() {
+        sync();
+        return screenInfo.dialogFailure;
+    }
+
     /**
      * Syncs the monitor and calling thread for data to load.
      */

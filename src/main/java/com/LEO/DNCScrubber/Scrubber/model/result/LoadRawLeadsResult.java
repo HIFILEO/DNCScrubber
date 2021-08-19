@@ -17,19 +17,52 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-public class LoadRawLeadsResult extends Result {
-    private @ResultType int resultType;
-    private boolean needsFileName;
-    private String errorMessage;
+import java.io.File;
 
-    public LoadRawLeadsResult(int resultType, boolean needsFileName, String errorMessage) {
+public class LoadRawLeadsResult extends Result {
+    private final @ResultType int resultType;
+    private final String errorMessage;
+    private final boolean userCanceled;
+    private final boolean fileLoadError;
+    private final int numberOfColdLeadDuplicates;
+    private final int numberOfColdLeadsSaved;
+    private final int numberOfColdLeadErrors;
+    public LoadRawLeadsResult(int resultType, String errorMessage, boolean userCanceled,
+                              boolean fileLoadError, int numberOfColdLeadDuplicates, int numberOfColdLeadsSaved,
+                              int numberOfColdLeadErrors) {
         this.resultType = resultType;
-        this.needsFileName = needsFileName;
         this.errorMessage = errorMessage;
+        this.userCanceled = userCanceled;
+        this.fileLoadError = fileLoadError;
+        this.numberOfColdLeadsSaved = numberOfColdLeadsSaved;
+        this.numberOfColdLeadErrors = numberOfColdLeadErrors;
+        this.numberOfColdLeadDuplicates = numberOfColdLeadDuplicates;
     }
 
-    public static LoadRawLeadsResult inFlight(boolean needsFileName) {
-        return new LoadRawLeadsResult(ResultType.IN_FLIGHT, needsFileName, "");
+    public static LoadRawLeadsResult inFlight() {
+        return new LoadRawLeadsResult(ResultType.IN_FLIGHT, "", false,
+                false, 0 , 0, 0);
+    }
+
+    public static LoadRawLeadsResult success(int numberOfColdLeadDuplicates, int numberOfColdLeadsSaved,
+                                             int numberOfColdLeadErrors, String errorMessage) {
+        return new LoadRawLeadsResult(Result.ResultType.SUCCESS,
+                errorMessage,
+                false,
+                false,
+                numberOfColdLeadDuplicates,
+                numberOfColdLeadsSaved,
+                numberOfColdLeadErrors);
+    }
+
+    public static LoadRawLeadsResult error(String errorMessage, boolean fileLoadError) {
+        return new LoadRawLeadsResult(Result.ResultType.FAILURE,
+                errorMessage,
+                false,
+                fileLoadError,
+                0,
+                0,
+                0);
     }
 
     @Override
@@ -37,11 +70,27 @@ public class LoadRawLeadsResult extends Result {
         return resultType;
     }
 
-    public boolean isNeedsFileName() {
-        return needsFileName;
-    }
-
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    public boolean isUserCanceled() {
+        return userCanceled;
+    }
+
+    public boolean isFileLoadError() {
+        return fileLoadError;
+    }
+
+    public int getNumberOfColdLeadDuplicates() {
+        return numberOfColdLeadDuplicates;
+    }
+
+    public int getNumberOfColdLeadsSaved() {
+        return numberOfColdLeadsSaved;
+    }
+
+    public int getNumberOfColdLeadErrors() {
+        return numberOfColdLeadErrors;
     }
 }

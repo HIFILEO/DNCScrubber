@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.model.uiModel;/*
+package com.LEO.DNCScrubber.util;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,19 +17,49 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import java.util.List;
+import com.opencsv.bean.CsvBindByName;
 
-/**
- * Java representation of JSON file for screen data.
- */
-public class ScreenInfo {
-    public String mainCommands;
-    public String error;
-    public String success;
-    public String fileNameMessage;
-    public String[] commands;
-    public String noSelectionMade;
-    public String inProgress;
-    public String dialogCancel;
-    public String dialogFailure;
+public class Visitors {
+    public Visitors() {
+
+    }
+
+    public Visitors(String firstName, String lastName, int visitsToWebsite) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.visitsToWebsite = visitsToWebsite;
+    }
+
+    @CsvBindByName
+    private String firstName;
+
+    @CsvBindByName
+    private String lastName;
+
+    @CsvBindByName
+    private int visitsToWebsite;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public int getVisitsToWebsite() {
+        return visitsToWebsite;
+    }
+
+    public void setVisitsToWebsite(int visitsToWebsite) {
+        this.visitsToWebsite = visitsToWebsite;
+    }
 }
