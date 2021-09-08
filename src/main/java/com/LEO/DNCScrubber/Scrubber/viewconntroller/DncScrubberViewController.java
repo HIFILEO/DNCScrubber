@@ -288,8 +288,7 @@ public class DncScrubberViewController {
                     if (file != null) {
                         switch (uiModel.getCommand()) {
                             case SAVE_LEADS_TO_SKIP_TRACE:
-                                //TODO - oh so much fun
-                                //emitter.onSuccess(new LoadRawLeadsEvent(file));
+                                emitter.onSuccess(new ExportLeadsToSkipTraceEvent(file));
                                 break;
                             default:
                                 throw new Exception("Wrong command Type! Should never happen!");

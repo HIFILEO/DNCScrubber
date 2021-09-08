@@ -32,12 +32,14 @@ import java.util.Arrays;
  */
 public class ScrubberInteractor {
     private final LoadRawDataInteractor loadRawDataInteractor;
+    private final ExportLeadsToSkipTraceInteractor exportLeadsToSkipTraceInteractor;
 
     @NonNull
     private final ObservableTransformer<Action, Result> transformActionIntoResults;
 
     public ScrubberInteractor(CsvFileController csvFileController, DatabaseGateway databaseGateway) {
         this.loadRawDataInteractor= new LoadRawDataInteractor(csvFileController, databaseGateway);
+        this.exportLeadsToSkipTraceInteractor = new ExportLeadsToSkipTraceInteractor(csvFileController, databaseGateway);
 
         /*
         Note the 'upstream->' represents new ObservableTransformer<T1,T1>
@@ -62,6 +64,11 @@ public class ScrubberInteractor {
                 upstream.flatMap((Function<SaveFileDialogAction, ObservableSource<SaveFileDialogResult>>)
                         this::transformSaveFileDialog);
 
+        ObservableTransformer<ExportLeadsToSkipTraceAction, ExportLeadsToSkipTraceResult> transformExportLeadsToSkipTrace
+                = upstream -> upstream.flatMap(
+                        (Function<ExportLeadsToSkipTraceAction, ObservableSource<ExportLeadsToSkipTraceResult>>)
+                        this::transformExportLeadsToSkipTrace);
+
         transformActionIntoResults = upstream -> upstream.publish
                 (new Function<Observable<Action>, ObservableSource<Result>>() {
             @Override
@@ -72,7 +79,8 @@ public class ScrubberInteractor {
                         actionObservable.ofType(LoadFileDialogAction.class).compose(transformLoadFileDialog),
                         actionObservable.ofType(LoadRawLeadsAction.class).compose(transformLoadRawLead),
                         actionObservable.ofType(NoSelectionAction.class).compose(transformNoSelection),
-                        actionObservable.ofType(SaveFileDialogAction.class).compose(transformSaveFileDialog)
+                        actionObservable.ofType(SaveFileDialogAction.class).compose(transformSaveFileDialog),
+                        actionObservable.ofType(ExportLeadsToSkipTraceAction.class).compose(transformExportLeadsToSkipTrace)
                     )
                 );
             }
@@ -116,5 +124,10 @@ public class ScrubberInteractor {
                         saveFileDialogAction.isFileSaveError(),
                         saveFileDialogAction.getErrorMessage())
         );
+    }
+
+    private Observable<ExportLeadsToSkipTraceResult> transformExportLeadsToSkipTrace(
+            ExportLeadsToSkipTraceAction exportLeadsToSkipTraceAction) {
+        return exportLeadsToSkipTraceInteractor.processExportLeadsToSkipTraceAction(exportLeadsToSkipTraceAction);
     }
 }

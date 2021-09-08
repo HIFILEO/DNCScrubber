@@ -89,6 +89,8 @@ public class DncScrubberViewModel {
                         return processLoadFileDialogResult(uiModel, (LoadFileDialogResult) result);
                     } else if (result instanceof SaveFileDialogResult) {
                         return processSaveFileDialogResult(uiModel, (SaveFileDialogResult) result);
+                    } else if (result instanceof ExportLeadsToSkipTraceResult){
+                        return processExportLeadsToSkipTraceResult(uiModel, (ExportLeadsToSkipTraceResult) result);
                     }
 
                     //Unknown result - throw error
@@ -126,15 +128,20 @@ public class DncScrubberViewModel {
                 upstream -> upstream.flatMap((Function<SaveFileDialogEvent, ObservableSource<SaveFileDialogAction>>)
                         this::transformSaveFileDialog);
 
+        final ObservableTransformer<ExportLeadsToSkipTraceEvent, ExportLeadsToSkipTraceAction> transformExportLeadsToSkipTrace =
+                upstream -> upstream.flatMap((Function<ExportLeadsToSkipTraceEvent, ObservableSource<ExportLeadsToSkipTraceAction>>)
+                        this::transformExportLeadsToSkipTrace);
+
         transformEventsIntoActions = upstream -> upstream.publish(uiEventObservable ->
-                Observable.merge(
-                        Arrays.asList(
-                                uiEventObservable.ofType(LoadRawLeadsEvent.class).compose(transformLoadRawLeads),
-                                uiEventObservable.ofType(ExitEvent.class).compose(transformExit),
-                                uiEventObservable.ofType(NoSelectionEvent.class).compose(transformNoSelection),
-                                uiEventObservable.ofType(LoadFileDialogEvent.class).compose(transformLoadFileDialog),
-                                uiEventObservable.ofType(SaveFileDialogEvent.class).compose(transformSaveFileDialog)
-                        )
+            Observable.merge(
+                Arrays.asList(
+                    uiEventObservable.ofType(LoadRawLeadsEvent.class).compose(transformLoadRawLeads),
+                    uiEventObservable.ofType(ExitEvent.class).compose(transformExit),
+                    uiEventObservable.ofType(NoSelectionEvent.class).compose(transformNoSelection),
+                    uiEventObservable.ofType(LoadFileDialogEvent.class).compose(transformLoadFileDialog),
+                    uiEventObservable.ofType(SaveFileDialogEvent.class).compose(transformSaveFileDialog),
+                    uiEventObservable.ofType(ExportLeadsToSkipTraceEvent.class).compose(transformExportLeadsToSkipTrace)
+                )
                 )
         );
     }
@@ -167,6 +174,14 @@ public class DncScrubberViewModel {
                         saveFileDialogEvent.isUserCanceled(),
                         saveFileDialogEvent.isFileSaveError(),
                         saveFileDialogEvent.getErrorMessage())
+        );
+    }
+
+    private Observable<ExportLeadsToSkipTraceAction> transformExportLeadsToSkipTrace(ExportLeadsToSkipTraceEvent exportLeadsToSkipTraceEvent) {
+        return Observable.just(
+                new ExportLeadsToSkipTraceAction(
+                        exportLeadsToSkipTraceEvent.getCsvFile()
+                )
         );
     }
 
@@ -278,5 +293,40 @@ public class DncScrubberViewModel {
         }
 
         return uiModelBuilder.createUiModel();
+    }
+
+    public UiModel processExportLeadsToSkipTraceResult(UiModel uiModel, ExportLeadsToSkipTraceResult exportLeadsToSkipTraceResult) {
+        UiModel.UiModelBuilder uiModelBuilder = new UiModel.UiModelBuilder(uiModel);
+
+        switch (exportLeadsToSkipTraceResult.getType()) {
+            case Result.ResultType.IN_FLIGHT:
+                uiModelBuilder.setScreenMessage(CommandType.SAVE_LEADS_TO_SKIP_TRACE + " " + screenData.getInProgress());
+                uiModelBuilder.setInFlight(true);
+                uiModelBuilder.setShowLoadFileDialog(false);
+                uiModelBuilder.setCommand(CommandType.SAVE_LEADS_TO_SKIP_TRACE);
+                break;
+            case Result.ResultType.FAILURE:
+                uiModelBuilder.setCommand(CommandType.NONE);
+                uiModelBuilder.setShowLoadFileDialog(false);
+                uiModelBuilder.setScreenMessage(CommandType.SAVE_LEADS_TO_SKIP_TRACE + " " +
+                        screenData.getError() + "\n" +
+                        "Error Msg: " + exportLeadsToSkipTraceResult.getErrorMessage() + "\n\n" +
+                        screenData.getMainCommands());
+                uiModelBuilder.setInFlight(false);
+                break;
+            case Result.ResultType.SUCCESS:
+                uiModelBuilder.setShowLoadFileDialog(false);
+                uiModelBuilder.setCommand(CommandType.NONE);
+                uiModelBuilder.setScreenMessage(CommandType.SAVE_LEADS_TO_SKIP_TRACE + " " +
+                        screenData.getSuccess() + "\n\n" + screenData.getMainCommands());
+                uiModelBuilder.setInFlight(false);
+                break;
+            default:
+                //Unknown result - throw error
+                throw new IllegalArgumentException("Unknown ResultType: " + exportLeadsToSkipTraceResult.getType());
+        }
+
+        return uiModelBuilder.createUiModel();
+
     }
 }

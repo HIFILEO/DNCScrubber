@@ -1,0 +1,12 @@
+2021-07-13 15:45:17 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement """Person""[*]SELECT * FROM ""ColdRvmLead"""; SQL statement:
+"Person"SELECT * FROM "ColdRvmLead" [42000-200]
+2021-07-20 09:12:54 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "DELETE *[*] FROM ""ColdRvmLead"""; expected "identifier"; SQL statement:
+DELETE * FROM "ColdRvmLead" [42001-200]
+2021-07-20 09:21:19 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement """Property""[*]"; SQL statement:
+"Property" [42000-200]
+2021-07-20 09:21:22 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement """Property""""Property""[*]"; SQL statement:
+"Property""Property" [42000-200]
