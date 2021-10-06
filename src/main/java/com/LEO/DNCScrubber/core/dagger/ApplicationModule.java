@@ -2,6 +2,7 @@ package com.LEO.DNCScrubber.core.dagger;
 
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileControllerImpl;
+import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseHelper;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGatewayImpl;
 import com.LEO.DNCScrubber.Scrubber.model.ScreenData;
@@ -20,14 +21,14 @@ public class ApplicationModule {
 
     @Singleton
     @Provides
-    public DatabaseGateway providesDatabaseGateway(HibernateUtil hibernateUtil) {
-        return new DatabaseGatewayImpl(hibernateUtil);
+    public DatabaseGateway providesDatabaseGateway(HibernateUtil hibernateUtil, DatabaseHelper databaseHelper) {
+        return new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
     }
 
     @Singleton
     @Provides
     public HibernateUtil providesHibernateUtil() {
-        return new HibernateUtil();
+        return new HibernateUtil("");
     }
 
     @Singleton
@@ -67,5 +68,11 @@ public class ApplicationModule {
     @Provides
     public ScreenData providesScreenData(Gson gson) {
         return new ScreenData(gson);
+    }
+
+    @Singleton
+    @Provides
+    public DatabaseHelper providesDatabaseHelper() {
+        return new DatabaseHelper();
     }
 }

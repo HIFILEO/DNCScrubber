@@ -17,6 +17,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -38,13 +39,18 @@ public class HibernateUtil  {
 
     /**
      * Constructor. Create hibernate factories required to hook into database.
+     * @param configFileName - leave blank to use default, hibernate.cfg.xml, other specify config to load
      */
-    public HibernateUtil() {
+    public HibernateUtil(@NotNull String configFileName) {
         //createDB();
 
         try {
             // Create registry
-            standardServiceRegistry = new StandardServiceRegistryBuilder().configure().build();
+            if (configFileName == null || configFileName.isEmpty()) {
+                standardServiceRegistry = new StandardServiceRegistryBuilder().configure().build();
+            } else {
+                standardServiceRegistry = new StandardServiceRegistryBuilder().configure(configFileName).build();
+            }
 
             // Create MetadataSources
             MetadataSources sources = new MetadataSources(standardServiceRegistry);

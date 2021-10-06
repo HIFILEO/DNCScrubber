@@ -30,7 +30,7 @@ public interface DatabaseGateway {
     /**
      * Write a single {@link ColdRvmLead} to the database. Will update or save.
      * @param coldRvmLead - lead to write
-     * @return - {@link Observable} boolean if successful, false otherwise
+     * @return - {@link Observable} boolean if successful, exception otherwise
      */
     Observable<Boolean> writeColdRvmLead(ColdRvmLead coldRvmLead);
 
@@ -39,4 +39,6 @@ public interface DatabaseGateway {
     Observable<Person> loadPersonByNaturalId(String naturalId);
 
     Observable<Property> loadPropertyByNaturalId(String naturalId);
+
+    Observable<Person> loadPersonsWithNoPhoneNumber();
 }

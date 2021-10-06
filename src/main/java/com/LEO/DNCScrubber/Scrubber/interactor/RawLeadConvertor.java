@@ -78,10 +78,8 @@ public class RawLeadConvertor {
         //
         // Create ColdRvmLead
         //
-        ColdRvmLead coldRvmLead = new ColdRvmLead();
+        ColdRvmLead coldRvmLead = new ColdRvmLead(person, property);
         coldRvmLead.setDateWorkflowStarted(rawLead.getDateAddedToList());
-        coldRvmLead.setPerson(person);
-        coldRvmLead.setProperty(property);
 
         return coldRvmLead;
     }

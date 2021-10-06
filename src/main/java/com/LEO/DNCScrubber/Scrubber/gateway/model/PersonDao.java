@@ -80,15 +80,25 @@ public class PersonDao {
     private String email2 = "";
     private String email3 = "";
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "Property_id")
+    /*
+    Note - Since multiple people can own a single property and a single property can have multiple owners,
+    this is many to many relationship. I do not expect to see which people own a property since this is a scrubbing
+    program so i am omitting the bi-directional on property object.
+
+    Read: https://www.coderscampus.com/hibernate-manytomany-unidirectional-bidirectional/
+     */
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name="person_property", joinColumns=@JoinColumn(name="person_id"), inverseJoinColumns=@JoinColumn(name="property_id"))
     private List<PropertyDao> properties = new ArrayList<PropertyDao>();
 
     /*
+    Note - you are not doing this but here for future reference:
         The parent entity, Person, features two utility methods which are used to synchronize both sides of the
         bidirectional association. You should always provide these methods whenever you are working with a
          bidirectional association as, otherwise, you risk very subtle state propagation issues.
          https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
+
+         ex - in addProperty you would also call property.setPerson(***)
      */
     /**
      * Add {@link PropertyDao} to Person
@@ -96,12 +106,10 @@ public class PersonDao {
      */
     public void addProperty(PropertyDao propertyDao) {
         properties.add(propertyDao);
-        propertyDao.setPerson(this);
     }
 
     public void removeProperty(PropertyDao propertyDao) {
         properties.remove(propertyDao);
-        propertyDao.setPerson(null);
     }
 
     public List<PropertyDao> getProperties() {
@@ -354,5 +362,9 @@ public class PersonDao {
 
     public void setNaturalId(String naturalId) {
         this.naturalId = naturalId;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

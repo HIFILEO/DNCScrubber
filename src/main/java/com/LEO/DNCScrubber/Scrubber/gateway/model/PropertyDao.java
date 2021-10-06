@@ -92,8 +92,19 @@ public class PropertyDao {
     fetching which is bad for performance.
     https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    private PersonDao person;
+    /*
+    If we do a mapping of ManyToOne, you can't have a Property referenced by two different people. Note
+    left here so you never do this.
+
+    For example, a husband and wife own the same property and if we put ManyToOne on Property table, then only
+    one person could own the home. Not true in real life.
+
+    https://www.baeldung.com/hibernate-one-to-many
+    Read Section: 6.1. Inconsistencies and Ownership
+     */
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "Property_id")
+//    private PersonDao person;
 
     /*
     Note - The child entity, PropertyDb, implement the equals and hashCode methods. Since we cannot rely on a natural
@@ -116,14 +127,6 @@ public class PropertyDao {
 
     public Long getId() {
         return id;
-    }
-
-    public void setPerson(PersonDao personDao) {
-        person = personDao;
-    }
-
-    public PersonDao getPerson() {
-        return person;
     }
 
     public String getAddress() {

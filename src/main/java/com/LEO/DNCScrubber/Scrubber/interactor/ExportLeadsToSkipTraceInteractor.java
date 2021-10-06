@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.model.action.ExportLeadsToSkipTraceAction;
+import com.LEO.DNCScrubber.Scrubber.model.data.Person;
 import com.LEO.DNCScrubber.Scrubber.model.result.ExportLeadsToSkipTraceResult;
 import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import io.reactivex.Observable;
@@ -47,11 +48,18 @@ public class ExportLeadsToSkipTraceInteractor {
      */
     public Observable<ExportLeadsToSkipTraceResult> processExportLeadsToSkipTraceAction(
             ExportLeadsToSkipTraceAction exportLeadsToSkipTraceAction) {
-        // 1- load all the
-        //TODO - here mother fucker
+        // 1- load all the People that don't have a phone number
+        //      Note - there can be more than one owner on a property - we will skip them both
+        // 2 - export the leads to a CSV
+        //      Note - specific to REISkipTrace and their requirements
+        // 3 - return status
         return Observable.just(new ExportLeadsToSkipTraceResult(Result.ResultType.SUCCESS, "", false, 100))
                 .delay(1, TimeUnit.SECONDS)
                 .startWith(new ExportLeadsToSkipTraceResult(Result.ResultType.IN_FLIGHT, "", false, 0));
     }
 
+    private Observable<Person> getPeopleToSkipTrace() {
+       return null;
+       //TODO fix this
+    }
 }

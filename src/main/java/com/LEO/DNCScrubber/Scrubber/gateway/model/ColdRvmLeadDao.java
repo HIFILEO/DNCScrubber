@@ -57,6 +57,10 @@ public class ColdRvmLeadDao {
     @JoinColumn(name="Property_id")
     private PropertyDao property;
 
+    public Long getId() {
+        return id;
+    }
+
     public Date getDateWorkflowStarted() {
         return dateWorkflowStarted;
     }

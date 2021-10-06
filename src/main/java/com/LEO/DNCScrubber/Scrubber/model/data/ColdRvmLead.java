@@ -33,6 +33,16 @@ public class ColdRvmLead {
     private Person person;
     private Property property;
 
+    /**
+     * Constructor -
+     * @param person - {@link Person} associated with this lead.
+     * @param property - {@link Property} associated with this lead.
+     */
+    public ColdRvmLead(Person person, Property property) {
+        this.person = person;
+        this.property = property;
+    }
+
     public Date getDateWorkflowStarted() {
         return dateWorkflowStarted;
     }

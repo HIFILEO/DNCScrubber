@@ -6,6 +6,7 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.dagger/dagger-compiler/2.11/756e69064a68fd9e25a9009604ca174ac71a3cee/dagger-compiler-2.11.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.hibernate/hibernate-jpamodelgen/5.5.7.Final/b2f7b418c0c51a0a12e22eb3f67748c888abbc0a/hibernate-jpamodelgen-5.5.7.Final.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.dagger/dagger-producers/2.11/4331ce4fb6a91682127000f88a2e3b8bd441d3fc/dagger-producers-2.11.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.dagger/dagger/2.11/95037eaee68aa48021511972e9db9ba29916e1c9/dagger-2.11.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.1/f7be08ec23c21485b9b5a1cf1654c2ec8c58168d/jsr305-3.0.1.jar" />
@@ -13,7 +14,15 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/21.0/3a3d111be1be1b745edfa7d91678a12d7ed38709/guava-21.0.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup/javapoet/1.7.0/4fdcf1fc27c1a8f55d1109df986c923152f07759/javapoet-1.7.0.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/javax.inject/javax.inject/1/6975da39a7040257bd51d21a231b76c915872d38/javax.inject-1.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jboss.logging/jboss-logging/3.4.2.Final/e517b8a93dd9962ed5481345e4d262fdd47c4217/jboss-logging-3.4.2.Final.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/jaxb-runtime/2.3.1/dd6dda9da676a54c5b36ca2806ff95ee017d8738/jaxb-runtime-2.3.1.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/javax.xml.bind/jaxb-api/2.3.1/8531ad5ac454cc2deb9d4d32c40c4d7451939b5d/jaxb-api-2.3.1.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.errorprone/javac/9-dev-r3297-1-shaded/f6d4998965282068a3feecddc21578d23f17275/javac-9-dev-r3297-1-shaded.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/javax.activation/javax.activation-api/1.2.0/85262acf3ca9816f9537ca47d5adeabaead7cb16/javax.activation-api-1.2.0.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/txw2/2.3.1/a09d2c48d3285f206fafbffe0e50619284e92126/txw2-2.3.1.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sun.istack/istack-commons-runtime/3.0.7/c197c86ceec7318b1284bffb49b54226ca774003/istack-commons-runtime-3.0.7.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jvnet.staxex/stax-ex/1.8/8cc35f73da321c29973191f2cf143d29d26a1df7/stax-ex-1.8.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sun.xml.fastinfoset/FastInfoset/1.2.15/bb7b7ec0379982b97c62cd17465cb6d9155f68e8/FastInfoset-1.2.15.jar" />
         </processorPath>
         <module name="DNCScrubber.main" />
       </profile>

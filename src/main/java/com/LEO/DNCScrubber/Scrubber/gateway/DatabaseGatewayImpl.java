@@ -18,14 +18,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 import com.LEO.DNCScrubber.Scrubber.gateway.model.ColdRvmLeadDao;
 import com.LEO.DNCScrubber.Scrubber.gateway.model.PersonDao;
+import com.LEO.DNCScrubber.Scrubber.gateway.model.PersonDao_;
 import com.LEO.DNCScrubber.Scrubber.gateway.model.PropertyDao;
 import com.LEO.DNCScrubber.Scrubber.model.data.*;
 import com.LEO.DNCScrubber.core.hibernate.HibernateUtil;
 import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
+import io.reactivex.functions.Function;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.stream.Stream;
 
 /**
  * {@link DatabaseGateway} implementation using Hibernate. https://hibernate.org/
@@ -33,20 +45,55 @@ import org.slf4j.LoggerFactory;
 public class DatabaseGatewayImpl implements DatabaseGateway{
     final static Logger logger = LoggerFactory.getLogger(DatabaseGatewayImpl.class);
     private final HibernateUtil hibernateUtil;
-    private final ColdRvmLeadHandler coldRvmLeadHandler;
+    private final DatabaseHelper databaseHelper;
 
     /**
      * Constructor
      * @param hibernateUtil - for DB interaction
      */
-    public DatabaseGatewayImpl(HibernateUtil hibernateUtil) {
+    public DatabaseGatewayImpl(HibernateUtil hibernateUtil, DatabaseHelper databaseHelper) {
         this.hibernateUtil = hibernateUtil;
-        this.coldRvmLeadHandler = new ColdRvmLeadHandler(hibernateUtil);
+        this.databaseHelper = databaseHelper;
     }
 
     @Override
     public Observable<Boolean> writeColdRvmLead(ColdRvmLead coldRvmLead) {
-        return coldRvmLeadHandler.writeRawLead(coldRvmLead);
+
+        Transaction transaction = null;
+        try (Session session = hibernateUtil.getSessionFactory().getCurrentSession()) {
+            transaction = session.beginTransaction();
+
+            /*
+            Note - primary key = auto generated ID. The CSV data has no primary ID and to use "String"
+            as a key is bad practice since it's almost always non-unique.
+
+            So we are using a 'naturalID' that is an association of unique fields i the data.
+
+            Furthermore, hibernate does not do an "update" if exists, "insert" otherwise. It's not that smart.
+            Instead it always 'inserts' if the primary key is null. It's up to you to first look for the id in
+            the session. Even saveOrUpdate() does not work because the cascade inserts will throw duplicate
+            entry exceptions.
+
+            So the rule of thumb is this: save from bottom up while searching for naturalKey every time.
+             */
+            databaseHelper.saveColdRvmLead(session, coldRvmLead);
+            transaction.commit();
+            logger.debug("Raw Lead Written To DB Successfully");
+        } catch (Exception exception) {
+            logger.error("Raw Lead Failed To Write To DB. Error - []", exception);
+            if (transaction != null && transaction.isActive()) {
+                //Note - why double try - https://mkyong.com/hibernate/hibernate-transaction-handle-example/
+                try{
+                    transaction.rollback();
+                }catch(RuntimeException runtimeException){
+                    logger.error("Raw Lead couldn't roll back transaction", runtimeException);
+                }
+            }
+
+            return Observable.error(exception);
+        }
+
+        return Observable.just(true);
     }
 
     @Override
@@ -70,7 +117,7 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         if (coldRvmLeadDao == null) {
             return Observable.empty();
         } else {
-            return Observable.just(this.convertToColdRvmLead(coldRvmLeadDao));
+            return Observable.just(databaseHelper.translateColdRvmLeadDbToColdRvmLead(coldRvmLeadDao));
         }
     }
 
@@ -94,7 +141,7 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         if (personDao == null) {
             return Observable.empty();
         } else {
-            return Observable.just(this.convertToPerson(personDao));
+            return Observable.just(databaseHelper.translatePersonDbToPerson(personDao));
         }
     }
 
@@ -118,127 +165,84 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         if (propertyDao == null) {
             return Observable.empty();
         } else {
-            return Observable.just(this.convertToProperty(propertyDao));
+            return Observable.just(databaseHelper.translatePropertyDbToProperty(propertyDao));
         }
     }
 
     /**
-     * Convert {@link ColdRvmLeadDao} to {@link ColdRvmLead}
-     * @param coldRvmLeadDao - DAO
-     * @return - {@link ColdRvmLead}
+     * Load all {@link Person} who have no phone numbers.
+     * @return a stream of {@link Person}
      */
-    private ColdRvmLead convertToColdRvmLead(ColdRvmLeadDao coldRvmLeadDao) {
-        ColdRvmLead coldRvmLead = new ColdRvmLead();
-        coldRvmLead.setDateWorkflowStarted(coldRvmLeadDao.getDateWorkflowStarted());
-        coldRvmLead.setConversationStarted(coldRvmLeadDao.isConversationStarted());
-        coldRvmLead.setToldToStop(coldRvmLeadDao.isToldToStop());
-        coldRvmLead.setSold(coldRvmLeadDao.isSold());
-        coldRvmLead.setWrongNumber(coldRvmLeadDao.isWrongNumber());
-        coldRvmLead.setOfferMade(coldRvmLeadDao.isOfferMade());
-        coldRvmLead.setLeadSentToAgent(coldRvmLeadDao.isLeadSentToAgent());
-        coldRvmLead.setPerson(convertToPerson(coldRvmLeadDao.getPerson()));
-        coldRvmLead.setProperty(convertToProperty(coldRvmLeadDao.getProperty()));
+    public Observable<Person> loadPersonsWithNoPhoneNumber() {
+        return Observable.create((ObservableOnSubscribe<PersonDao>) emitter -> {
+            Transaction transaction = null;
 
-        return coldRvmLead;
-    }
+            try (Session session = hibernateUtil.getSessionFactory().openSession()) {
+                transaction = session.beginTransaction();
 
-    /**
-     * Convert {@link PersonDao} to {@link Person}
-     * @param personDao - DAO
-     * @return - {@link Person}
-     */
-    private Person convertToPerson(PersonDao personDao) {
-        Address address = new Address(
-                personDao.getAddress(),
-                personDao.getUnitNumber(),
-                personDao.getCity(),
-                personDao.getState(),
-                personDao.getZip(),
-                personDao.getCounty(),
-                personDao.getCountry()
-        );
+                //Setup the builder to query for a specific DAO
+                CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+                CriteriaQuery<PersonDao> criteriaQuery = criteriaBuilder.createQuery(PersonDao.class);
+                Root<PersonDao> rootPersonDao = criteriaQuery.from(PersonDao.class);
 
-        Phone phone1 = new Phone();
-        phone1.setPhoneNumber(personDao.getPhone1());
-        phone1.setPhoneType(personDao.getPhone1Type());
-        phone1.setPhoneDNC(personDao.isPhone1DNC());
-        phone1.setPhoneStop(personDao.isPhone1Stop());
-        phone1.setPhoneLitigation(personDao.isPhone1Litigation());
-        phone1.setPhoneTelco(personDao.getPhone1Telco());
+                //MetaModel - the ability to access the String value of an attribute using generated code so you can
+                //simplify your SQL queries. Awesome.
+                //https://www.baeldung.com/hibernate-criteria-queries-metamodel
+                //https://stackoverflow.com/questions/14422543/hibernate-criteria-filter-by-related-entity
 
-        Phone phone2 = new Phone();
-        phone2.setPhoneNumber(personDao.getPhone2());
-        phone2.setPhoneType(personDao.getPhone2Type());
-        phone2.setPhoneDNC(personDao.isPhone2DNC());
-        phone2.setPhoneStop(personDao.isPhone2Stop());
-        phone2.setPhoneLitigation(personDao.isPhone2Litigation());
-        phone2.setPhoneTelco(personDao.getPhone2Telco());
+                //Setup the WHERE clauses - where phone1 is empty AND phone 2 is empty AND phone 3 is empty
+                Predicate[] predicates = new Predicate[3];
 
-        Phone phone3 = new Phone();
-        phone3.setPhoneNumber(personDao.getPhone3());
-        phone3.setPhoneType(personDao.getPhone3Type());
-        phone3.setPhoneDNC(personDao.isPhone3DNC());
-        phone3.setPhoneStop(personDao.isPhone3Stop());
-        phone3.setPhoneLitigation(personDao.isPhone3Litigation());
-        phone3.setPhoneTelco(personDao.getPhone3Telco());
+                predicates[0] = criteriaBuilder.or(
+                        criteriaBuilder.isNull(rootPersonDao.get(PersonDao_.phone1)),
+                        criteriaBuilder.like(rootPersonDao.get(PersonDao_.phone1), ""));
 
-        Person person = new Person(
-                personDao.getFirstName(),
-                personDao.getLastName(),
-                address);
-        person.setPhone1(phone1);
-        person.setPhone2(phone2);
-        person.setPhone3(phone3);
-        person.setEmail1(personDao.getEmail1());
-        person.setEmail2(personDao.getEmail2());
-        person.setEmail3(personDao.getEmail3());
+                predicates[1] = criteriaBuilder.or(
+                        criteriaBuilder.isNull(rootPersonDao.get(PersonDao_.phone2)),
+                        criteriaBuilder.like(rootPersonDao.get(PersonDao_.phone2), ""));
 
-        for (PropertyDao propertyDao : personDao.getProperties()) {
-            person.addProperty(convertToProperty(propertyDao));
-        }
+                predicates[2] = criteriaBuilder.or(
+                        criteriaBuilder.isNull(rootPersonDao.get(PersonDao_.phone3)),
+                        criteriaBuilder.like(rootPersonDao.get(PersonDao_.phone3), ""));
 
-        return person;
-    }
+                criteriaQuery.select(rootPersonDao).where(criteriaBuilder.and(predicates));
 
-    /**
-     * Convert {@link Property } to {@link Property}
-     * @param propertyDao
-     * @return
-     */
-    private Property convertToProperty(PropertyDao propertyDao) {
-        Address address = new Address(
-                propertyDao.getAddress(),
-                propertyDao.getUnitNumber(),
-                propertyDao.getCity(),
-                propertyDao.getState(),
-                propertyDao.getZip(),
-                propertyDao.getCounty(),
-                propertyDao.getCountry()
-        );
+                //Execute Query
+                //Note - You want to batch your queries so you get all results when database is large
+                // - You can do this by hand, or use Java Streams (Not RX)
+                // - How hibernate pagination works - https://www.baeldung.com/hibernate-pagination
+                // - How stream() works under the hood for ScrollableResult pagination -
+                //      https://thorben-janssen.com/get-query-results-stream-hibernate-5/
+                Query<PersonDao> query = session.createQuery(criteriaQuery);
 
-        Property property = new Property(propertyDao.getaPN(), address);
-        property.setOwnerOccupied(propertyDao.isOwnerOccupied());
-        property.setCompanyName(propertyDao.getCompanyName());
-        property.setCompanyAddress(propertyDao.getCompanyAddress());
-        property.setPropertyType(propertyDao.getPropertyType());
-        property.setBedrooms(propertyDao.getBedrooms());
-        property.setTotalBathrooms(propertyDao.getTotalBathrooms());
-        property.setSqft(propertyDao.getSqft());
-        property.setLotSizeSqft(propertyDao.getLoftSizeSqft());
-        property.setYearBuilt(propertyDao.getYearBuilt());
-        property.setAssessedValue(propertyDao.getAssessedValue());
-        property.setLastSaleRecordingDate(propertyDao.getLastSaleRecordingDate());
-        property.setLastSaleAmount(propertyDao.getLastSaleAmount());
-        property.setTotalOpenLoans(propertyDao.getTotalOpenLoans());
-        property.setEstimatedRemainingBalance(propertyDao.getEstimatedRemainingBalance());
-        property.setEstimatedValue(propertyDao.getEstimatedValue());
-        property.setEstimatedEquity(propertyDao.getEstimatedEquity());
-        property.setmLSStatus(propertyDao.getmLSStatus());
-        property.setMlsDate(propertyDao.getmLSDate());
-        property.setmLSAmount(propertyDao.getmLSAmount());
-        property.setLienAmount(propertyDao.getLienAmount());
-        property.setDateAddedToList(propertyDao.getDateAddedToList());
+                //Note - fetch size is a hint to the JDBC on how many rows to return every round trip.
+                // - If not set, it's defaulted to the database itself.
+                // - I decided to set it to 100
+                //
+                //Ex - Oracle 10, Db2 - 32
+                //https://stackoverflow.com/questions/3355231/whats-the-default-size-of-hibernate-jdbc-fetch-size
+                //Read - https://jeffreyjacobs.wordpress.com/2017/05/28/setting-jdbc-fetch-size-in-hibernate/
+                query.setFetchSize(10);
 
-        return property;
+                Stream<PersonDao> personDaoStream = query.stream();
+
+                //switch from java streams to RX streams
+                personDaoStream.forEach(emitter::onNext);
+                personDaoStream.close();
+
+            } catch (Exception exception){
+                if (transaction != null) {
+                    transaction.rollback();
+                }
+                logger.error("Load PropertyDoa threw an exception. Ignoring - return empty. Error - []", exception);
+            }
+
+            emitter.onComplete();
+        }).flatMap(new Function<PersonDao, ObservableSource<Person>>() {
+            @Override
+            public ObservableSource<Person> apply(PersonDao personDao) throws Exception {
+                return Observable.just(databaseHelper.translatePersonDbToPerson(personDao));
+            }
+        });
     }
 }
