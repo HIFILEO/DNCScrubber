@@ -25,6 +25,8 @@ import com.LEO.DNCScrubber.core.hibernate.HibernateUtil;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
+import io.reactivex.Single;
+import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -37,6 +39,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -169,11 +173,9 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
         }
     }
 
-    /**
-     * Load all {@link Person} who have no phone numbers.
-     * @return a stream of {@link Person}
-     */
-    public Observable<Person> loadPersonsWithNoPhoneNumber() {
+    @Override
+    public Single<List<Person>> loadPersonsWithNoPhoneNumber() {
+
         return Observable.create((ObservableOnSubscribe<PersonDao>) emitter -> {
             Transaction transaction = null;
 
@@ -242,6 +244,12 @@ public class DatabaseGatewayImpl implements DatabaseGateway{
             @Override
             public ObservableSource<Person> apply(PersonDao personDao) throws Exception {
                 return Observable.just(databaseHelper.translatePersonDbToPerson(personDao));
+            }
+        }).reduce(new ArrayList<Person>(), new BiFunction<List<Person>, Person, List<Person>>() {
+            @Override
+            public List<Person> apply(List<Person> personArrayList, Person person) throws Exception {
+                personArrayList.add(person);
+                return personArrayList;
             }
         });
     }

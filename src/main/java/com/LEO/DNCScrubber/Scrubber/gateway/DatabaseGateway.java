@@ -21,6 +21,9 @@ import com.LEO.DNCScrubber.Scrubber.model.data.ColdRvmLead;
 import com.LEO.DNCScrubber.Scrubber.model.data.Person;
 import com.LEO.DNCScrubber.Scrubber.model.data.Property;
 import io.reactivex.Observable;
+import io.reactivex.Single;
+
+import java.util.List;
 
 /**
  * Gateway for interacting with a database for persistence.
@@ -40,5 +43,10 @@ public interface DatabaseGateway {
 
     Observable<Property> loadPropertyByNaturalId(String naturalId);
 
-    Observable<Person> loadPersonsWithNoPhoneNumber();
+    /**
+     * Load all {@link Person} who have no phone numbers.
+     * @return a {@link Single} {@link List} of {@link Person}s.
+     * If no people in database, list is empty.
+     */
+    Single<List<Person>> loadPersonsWithNoPhoneNumber();
 }

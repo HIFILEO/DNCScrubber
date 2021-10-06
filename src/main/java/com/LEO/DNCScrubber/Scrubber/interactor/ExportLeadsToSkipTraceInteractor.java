@@ -49,7 +49,7 @@ public class ExportLeadsToSkipTraceInteractor {
     public Observable<ExportLeadsToSkipTraceResult> processExportLeadsToSkipTraceAction(
             ExportLeadsToSkipTraceAction exportLeadsToSkipTraceAction) {
         // 1- load all the People that don't have a phone number
-        //      Note - there can be more than one owner on a property - we will skip them both
+        //      Note - there can be more than one owner on a property - we will skip trace them both
         // 2 - export the leads to a CSV
         //      Note - specific to REISkipTrace and their requirements
         // 3 - return status

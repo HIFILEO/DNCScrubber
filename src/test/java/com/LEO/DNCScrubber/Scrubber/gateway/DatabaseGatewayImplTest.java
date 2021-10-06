@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -201,7 +202,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelperMock = Mockito.mock(DatabaseHelper.class);
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelperMock);
@@ -215,8 +216,12 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //Assert
         //
         testObserver.assertNoErrors();
-        testObserver.assertValueCount(0);
+        testObserver.assertValueCount(1);
         testObserver.assertComplete();
+
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+        assertThat(personList.isEmpty()).isTrue();
     }
 
     @Test
@@ -224,7 +229,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
@@ -248,8 +253,12 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //Assert
         //
         testObserver.assertNoErrors();
-        testObserver.assertValueCount(0);
+        testObserver.assertValueCount(1);
         testObserver.assertComplete();
+
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+        assertThat(personList.isEmpty()).isTrue();
     }
 
     @Test
@@ -257,7 +266,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
@@ -283,8 +292,12 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //Assert
         //
         testObserver.assertNoErrors();
-        testObserver.assertValueCount(0);
+        testObserver.assertValueCount(1);
         testObserver.assertComplete();
+
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+        assertThat(personList.isEmpty()).isTrue();
     }
 
     @Test
@@ -292,7 +305,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
@@ -318,8 +331,12 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //Assert
         //
         testObserver.assertNoErrors();
-        testObserver.assertValueCount(0);
+        testObserver.assertValueCount(1);
         testObserver.assertComplete();
+
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+        assertThat(personList.isEmpty()).isTrue();
     }
 
     @Test
@@ -327,7 +344,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
@@ -353,8 +370,12 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //Assert
         //
         testObserver.assertNoErrors();
-        testObserver.assertValueCount(0);
+        testObserver.assertValueCount(1);
         testObserver.assertComplete();
+
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+        assertThat(personList.isEmpty()).isTrue();
     }
 
     @Test
@@ -362,7 +383,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
@@ -391,7 +412,10 @@ class DatabaseGatewayImplTest extends HibernateTest {
         testObserver.assertValueCount(1);
         testObserver.assertComplete();
 
-        Person personToTest = (Person) testObserver.getEvents().get(0).get(0);
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+
+        Person personToTest = personList.get(0);
         assertThat(person.getNaturalId()).isEqualToIgnoringCase(personToTest.getNaturalId());
 
         assertThat(person.getFirstName()).isEqualToIgnoringCase(personToTest.getFirstName());
@@ -467,7 +491,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
@@ -501,7 +525,9 @@ class DatabaseGatewayImplTest extends HibernateTest {
         testObserver.assertValueCount(1);
         testObserver.assertComplete();
 
-        Person personToTest = (Person) testObserver.getEvents().get(0).get(0);
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+        Person personToTest = personList.get(0);
         assertThat(person.getNaturalId()).isEqualToIgnoringCase(personToTest.getNaturalId());
 
         assertThat(person.getFirstName()).isEqualToIgnoringCase(personToTest.getFirstName());
@@ -577,7 +603,7 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //
         //Arrange
         //
-        TestObserver<Person> testObserver;
+        TestObserver<List<Person>> testObserver;
 
         DatabaseHelper databaseHelper = new DatabaseHelper();
         DatabaseGatewayImpl databaseGateway = new DatabaseGatewayImpl(hibernateUtil, databaseHelper);
@@ -611,8 +637,12 @@ class DatabaseGatewayImplTest extends HibernateTest {
         //Assert
         //
         testObserver.assertNoErrors();
-        testObserver.assertValueCount(1000);
+        testObserver.assertValueCount(1);
         testObserver.assertComplete();
+
+        @SuppressWarnings("unchecked")
+        List<Person> personList = (List<Person>) testObserver.getEvents().get(0).get(0);
+        assertThat(personList.size()).isEqualTo(1000);
     }
 
     @Test
