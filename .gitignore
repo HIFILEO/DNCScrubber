@@ -24,8 +24,11 @@ gradle-app.setting
 *.war
 *.ear
 
-# Avoid ignoreing Gradle wrapper ar file 
+# Avoid ignoreing Gradle wrapper ar file
 !gradle-wrapper.ar
+
+# Avoid ignoring Grasle wrapper JAR file
+!gradle-wrapper.jar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*

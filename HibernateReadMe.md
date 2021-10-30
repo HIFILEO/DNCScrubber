@@ -4,6 +4,13 @@
 The purpose of this read-me is to document decisions being made around 
 hibernate and the database that it interacts with.
 
+## Separation of Business Logic
+Database objects in hibernate are tied to Sessions and their annotations 
+make them difficult to mask with interfaces in the business logic. So the
+decision was to have Business objects that are specific to our needs
+regardless of the DAO. This wasn't the same decision like OpenCSV which
+i would mask with interfaces. 
+
 ## Choice of Database
 Hibernate is a great ORM and allows a multitude of supporting databases. 
 Since this program is a simple filtering program there was no concern about 

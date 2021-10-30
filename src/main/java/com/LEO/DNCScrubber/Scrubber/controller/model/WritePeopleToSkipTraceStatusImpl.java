@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.controller;/*
+package com.LEO.DNCScrubber.Scrubber.controller.model;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -16,24 +16,31 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+import com.LEO.DNCScrubber.Scrubber.model.WritePeopleToSkipTraceStatus;
 
-import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
-import com.opencsv.bean.BeanVerifier;
-import com.opencsv.exceptions.CsvConstraintViolationException;
+public class WritePeopleToSkipTraceStatusImpl implements WritePeopleToSkipTraceStatus {
+    private final boolean success;
+    private final String errorMessage;
+    private final int linesWritten;
 
-public class RawLedVerifier implements BeanVerifier {
-    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
+    public WritePeopleToSkipTraceStatusImpl(boolean success, String errorMessage, int linesWritten) {
+        this.success = success;
+        this.errorMessage = errorMessage;
+        this.linesWritten = linesWritten;
+    }
 
     @Override
-    public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
-        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
-        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
-            throw new CsvConstraintViolationException(ERROR_MSG);
-        }
+    public boolean success() {
+        return this.success;
+    }
 
-        return true;
+    @Override
+    public String errorMessage() {
+        return this.errorMessage;
+    }
+
+    @Override
+    public int linesWritten() {
+        return this.linesWritten;
     }
 }

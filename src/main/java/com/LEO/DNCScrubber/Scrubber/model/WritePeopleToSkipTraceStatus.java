@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.controller;/*
+package com.LEO.DNCScrubber.Scrubber.model;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,23 +17,26 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
-import com.opencsv.bean.BeanVerifier;
-import com.opencsv.exceptions.CsvConstraintViolationException;
+/**
+ * Class to act as a status when writing CSV file for {@link com.LEO.DNCScrubber.Scrubber.model.data.Person} to skip
+ * trace.
+ */
+public interface WritePeopleToSkipTraceStatus {
+    /**
+     * Status of the write.
+     * @return - true if CSV file written, false otherwise.
+     */
+    boolean success();
 
-public class RawLedVerifier implements BeanVerifier {
-    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
+    /**
+     * When success if false, error message will be contained in here.
+     * @return - error message when available
+     */
+    String errorMessage();
 
-    @Override
-    public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
-        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
-        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
-            throw new CsvConstraintViolationException(ERROR_MSG);
-        }
-
-        return true;
-    }
+    /**
+     * Get number of lines written.
+     * @return - number of lines written
+     */
+    int linesWritten();
 }

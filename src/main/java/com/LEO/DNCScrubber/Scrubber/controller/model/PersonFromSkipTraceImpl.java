@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.controller;/*
+package com.LEO.DNCScrubber.Scrubber.controller.model;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -17,23 +17,34 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
-import com.opencsv.bean.BeanVerifier;
-import com.opencsv.exceptions.CsvConstraintViolationException;
+import com.LEO.DNCScrubber.Scrubber.model.data.Person;
+import com.LEO.DNCScrubber.Scrubber.model.data.PersonFromSkipTrace;
 
-public class RawLedVerifier implements BeanVerifier {
-    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
+import java.util.Optional;
+
+public class PersonFromSkipTraceImpl implements PersonFromSkipTrace {
+    private final Person person;
+    private final String errorMessage;
+
+    public PersonFromSkipTraceImpl(Person person, String errorMessage) {
+        this.person = person;
+        this.errorMessage = errorMessage;
+    }
 
     @Override
-    public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
-        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
-        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
-            throw new CsvConstraintViolationException(ERROR_MSG);
-        }
-
-        return true;
+    public Optional<Person> getPerson() {
+        return Optional.ofNullable(person);
     }
+
+    @Override
+    public Optional<String> getErrorMessage() {
+        return Optional.ofNullable(errorMessage);
+    }
+
+    @Override
+    public boolean hasError() {
+        return errorMessage != null && !errorMessage.isEmpty();
+    }
+
+
 }

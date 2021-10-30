@@ -17,23 +17,28 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
+import com.LEO.DNCScrubber.Scrubber.controller.model.ReiSkipTraceCsv;
 import com.opencsv.bean.BeanVerifier;
 import com.opencsv.exceptions.CsvConstraintViolationException;
 
-public class RawLedVerifier implements BeanVerifier {
-    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
+/**
+ * Class to verify the {@link ReiSkipTraceCsv}.
+ *
+ * Note - some fields are required for {@link ReiSkipTraceCsv}, those that are a combination are here.
+ */
+public class ReiSkipTraceVerifier implements BeanVerifier {
+    public static final String NO_PHONE_NUMBERS_ERROR_MSG = "Cannot process skip trace person who has no phone numbers.";
 
     @Override
     public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
-        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
-        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
-            throw new CsvConstraintViolationException(ERROR_MSG);
+        ReiSkipTraceCsv reiSkipTraceCsv = (ReiSkipTraceCsv) bean;
+        if ((reiSkipTraceCsv.getPhone1() == null || reiSkipTraceCsv.getPhone1().isEmpty()) &&
+                (reiSkipTraceCsv.getPhone2() == null || reiSkipTraceCsv.getPhone2().isEmpty()) &&
+                (reiSkipTraceCsv.getPhone3() == null || reiSkipTraceCsv.getPhone3().isEmpty())) {
+            throw new CsvConstraintViolationException(NO_PHONE_NUMBERS_ERROR_MSG);
         }
 
         return true;
     }
 }
+

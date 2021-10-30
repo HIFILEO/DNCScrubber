@@ -27,6 +27,8 @@ public class ExportLeadsToSkipTraceResult extends Result {
                                         int numberOfLeadsExported) {
         this.resultType = resultType;
         this.errorMessage = errorMessage;
+
+        //TODO - remove this no?
         this.fileLoadError = fileLoadError;
         this.numberOfLeadsExported = numberOfLeadsExported;
     }

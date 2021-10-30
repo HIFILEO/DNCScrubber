@@ -2,6 +2,7 @@ package com.LEO.DNCScrubber.core.dagger;
 
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileControllerImpl;
+import com.LEO.DNCScrubber.Scrubber.controller.CsvHelper;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseHelper;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGatewayImpl;
@@ -13,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dagger.Module;
 import dagger.Provides;
+import org.h2.tools.Csv;
 
 import javax.inject.Singleton;
 
@@ -46,8 +48,8 @@ public class ApplicationModule {
 
     @Singleton
     @Provides
-    public CsvFileController providesCsvFileReader() {
-        return new CsvFileControllerImpl();
+    public CsvFileController providesCsvFileReader(CsvHelper csvHelper) {
+        return new CsvFileControllerImpl(csvHelper);
     }
 
     @Singleton
@@ -74,5 +76,11 @@ public class ApplicationModule {
     @Provides
     public DatabaseHelper providesDatabaseHelper() {
         return new DatabaseHelper();
+    }
+
+    @Singleton
+    @Provides
+    public CsvHelper providesCsvHelper() {
+        return new CsvHelper();
     }
 }

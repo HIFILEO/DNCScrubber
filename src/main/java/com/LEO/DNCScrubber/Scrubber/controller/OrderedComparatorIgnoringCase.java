@@ -17,23 +17,26 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
-import com.opencsv.bean.BeanVerifier;
-import com.opencsv.exceptions.CsvConstraintViolationException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-public class RawLedVerifier implements BeanVerifier {
-    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
+/**
+ * Inspiration from:
+ * https://stackoverflow.com/questions/45203867/opencsv-how-to-create-csv-file-from-pojo-with-custom-column-headers-and-custom
+ */
+public class OrderedComparatorIgnoringCase implements Comparator<String> {
+    private List<String> predefinedOrder;
+
+    public OrderedComparatorIgnoringCase(String[] predefinedOrder) {
+        this.predefinedOrder = new ArrayList<>();
+        for (String item : predefinedOrder) {
+            this.predefinedOrder.add(item.toLowerCase());
+        }
+    }
 
     @Override
-    public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
-        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
-        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
-            throw new CsvConstraintViolationException(ERROR_MSG);
-        }
-
-        return true;
+    public int compare(String o1, String o2) {
+        return predefinedOrder.indexOf(o1.toLowerCase()) - predefinedOrder.indexOf(o2.toLowerCase());
     }
 }

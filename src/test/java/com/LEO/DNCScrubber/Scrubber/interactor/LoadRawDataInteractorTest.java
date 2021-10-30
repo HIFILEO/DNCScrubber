@@ -19,8 +19,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
  */
 
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
-import com.LEO.DNCScrubber.Scrubber.controller.RawLeadCsvImpl;
-import com.LEO.DNCScrubber.Scrubber.controller.RawLeadErrorImpl;
+import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
+import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadErrorImpl;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
 import com.LEO.DNCScrubber.Scrubber.model.action.LoadRawLeadsAction;
 import com.LEO.DNCScrubber.Scrubber.model.data.*;

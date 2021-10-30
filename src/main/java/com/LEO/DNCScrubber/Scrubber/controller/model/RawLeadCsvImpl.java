@@ -1,4 +1,4 @@
-package com.LEO.DNCScrubber.Scrubber.controller;/*
+package com.LEO.DNCScrubber.Scrubber.controller.model;/*
 Copyright 2021 Braavos Holdings, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and

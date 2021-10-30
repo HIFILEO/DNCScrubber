@@ -17,10 +17,15 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import com.LEO.DNCScrubber.Scrubber.model.WritePeopleToSkipTraceStatus;
+import com.LEO.DNCScrubber.Scrubber.model.data.Person;
+import com.LEO.DNCScrubber.Scrubber.model.data.PersonFromSkipTrace;
 import com.LEO.DNCScrubber.Scrubber.model.data.RawLead;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Controller for interacting with CSV File types.
@@ -35,4 +40,24 @@ public interface CsvFileController {
      * Will throw OnError where appropriate.
      */
     Observable<RawLead> readRawLeads(File file);
+
+    /**
+     * Save the given list to the file. Note - if list is empty the file will still be created.
+     *
+     * Note - Phone numbers & emails will automatically be omitted in the write to file.
+     *
+     * @param file - a file that we will write all the {@link Person} To.
+     * @param peopleList - {@link List} of {@link Person} to save to CSV File
+     * @return - {@link WritePeopleToSkipTraceStatus}
+     */
+    Single<WritePeopleToSkipTraceStatus> writePeopleToSkipTrace(File file, List<Person> peopleList);
+
+    /**
+     * Reads the given CSV file and returns each line as it's own {@link PersonFromSkipTrace} object.
+     *
+     * @param file - a CSV file that conforms to the {@link PersonFromSkipTrace}
+     * @return {@link PersonFromSkipTrace} (including ones with errors) until EOF is reached, then On Complete is called.
+     * Will throw OnError where appropriate.
+     */
+    Observable<PersonFromSkipTrace> readPeopleFromSkipTrace(File file);
 }

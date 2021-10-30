@@ -1,6 +1,6 @@
 package com.LEO.DNCScrubber.Scrubber.interactor;
 
-import com.LEO.DNCScrubber.Scrubber.controller.RawLeadCsvImpl;
+import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
 import com.LEO.DNCScrubber.Scrubber.controller.RawLedVerifier;
 import com.LEO.DNCScrubber.Scrubber.model.data.*;
 import com.LEO.DNCScrubber.rx.RxJavaTest;

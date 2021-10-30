@@ -19,13 +19,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 import com.LEO.DNCScrubber.Scrubber.controller.CsvFileController;
 import com.LEO.DNCScrubber.Scrubber.gateway.DatabaseGateway;
+import com.LEO.DNCScrubber.Scrubber.model.WritePeopleToSkipTraceStatus;
 import com.LEO.DNCScrubber.Scrubber.model.action.ExportLeadsToSkipTraceAction;
 import com.LEO.DNCScrubber.Scrubber.model.data.Person;
 import com.LEO.DNCScrubber.Scrubber.model.result.ExportLeadsToSkipTraceResult;
 import com.LEO.DNCScrubber.Scrubber.model.result.Result;
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.Function;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 public class ExportLeadsToSkipTraceInteractor {
     private final CsvFileController csvFileController;
@@ -53,13 +57,33 @@ public class ExportLeadsToSkipTraceInteractor {
         // 2 - export the leads to a CSV
         //      Note - specific to REISkipTrace and their requirements
         // 3 - return status
-        return Observable.just(new ExportLeadsToSkipTraceResult(Result.ResultType.SUCCESS, "", false, 100))
-                .delay(1, TimeUnit.SECONDS)
-                .startWith(new ExportLeadsToSkipTraceResult(Result.ResultType.IN_FLIGHT, "", false, 0));
-    }
-
-    private Observable<Person> getPeopleToSkipTrace() {
-       return null;
-       //TODO fix this
+        return databaseGateway.loadPersonsWithNoPhoneNumber()
+            .flatMap(new Function<List<Person>, SingleSource<WritePeopleToSkipTraceStatus>>() {
+                @Override
+                public SingleSource<WritePeopleToSkipTraceStatus> apply(List<Person> people) throws Exception {
+                    return csvFileController.writePeopleToSkipTrace(
+                            exportLeadsToSkipTraceAction.getCsvFile(),
+                            people
+                    );
+                }
+            })
+            .flatMap(new Function<WritePeopleToSkipTraceStatus, SingleSource<ExportLeadsToSkipTraceResult>>() {
+                @Override
+                public SingleSource<ExportLeadsToSkipTraceResult> apply(WritePeopleToSkipTraceStatus writePeopleToSkipTraceStatus) throws Exception {
+                    if (writePeopleToSkipTraceStatus.success()) {
+                        return Single.just(new ExportLeadsToSkipTraceResult(Result.ResultType.SUCCESS,
+                                "",
+                                false,
+                                writePeopleToSkipTraceStatus.linesWritten()));
+                    } else {
+                        return Single.just(new ExportLeadsToSkipTraceResult(Result.ResultType.FAILURE,
+                                writePeopleToSkipTraceStatus.errorMessage(),
+                                false,
+                                writePeopleToSkipTraceStatus.linesWritten()));
+                    }
+                }
+            })
+            .toObservable()
+            .startWith(new ExportLeadsToSkipTraceResult(Result.ResultType.IN_FLIGHT, "", false, 0));
     }
 }

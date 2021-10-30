@@ -17,23 +17,30 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTH
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.LEO.DNCScrubber.Scrubber.controller.model.RawLeadCsvImpl;
-import com.opencsv.bean.BeanVerifier;
-import com.opencsv.exceptions.CsvConstraintViolationException;
+import com.opencsv.bean.customconverter.ConverterLanguageToBoolean;
 
-public class RawLedVerifier implements BeanVerifier {
-    public static final String ERROR_MSG = "Cannot Process Raw Lead With No Names. You can't skip trace w/o name";
+public class ConvertReiSkipToBoolean<T, I> extends ConverterLanguageToBoolean<T, I> {
+
+    private static final String TRUE = "Yes";
+    private static final String FALSE = "No";
+    private static final String[] TRUE_STRINGS = {TRUE, "yes", "y", "1", "t"};
+    private static final String[] FALSE_STRINGS = {FALSE, "no", "n", "0", "f", "Unknown"};
+
+    /**
+     * Silence code style checker by adding a useless constructor.
+     */
+    public ConvertReiSkipToBoolean() {
+    }
 
     @Override
-    public boolean verifyBean(Object bean) throws CsvConstraintViolationException {
-        RawLeadCsvImpl rawLeadCsv = (RawLeadCsvImpl) bean;
-        if (rawLeadCsv.getOwnerOneFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerOneLastName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoFirstName().isEmpty() &&
-                rawLeadCsv.getOwnerTwoLastName().isEmpty()) {
-            throw new CsvConstraintViolationException(ERROR_MSG);
-        }
+    protected String getLocalizedTrue() { return TRUE; }
 
-        return true;
-    }
+    @Override
+    protected String getLocalizedFalse() { return FALSE; }
+
+    @Override
+    protected String[] getAllLocalizedTrueValues() { return TRUE_STRINGS; }
+
+    @Override
+    protected String[] getAllLocalizedFalseValues() { return FALSE_STRINGS; }
 }
